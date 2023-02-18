@@ -30,8 +30,8 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
 
     #检查权限
     if plugin_config['bingchat_allow_group'] == False and isinstance(event, GroupMessageEvent):
-        logger.info('组织群内消息')
-        return 
+        logger.info('无法再群聊进行')
+        await command_chat.finish('无法再群聊进行')
 
     user_input_text = arg.extract_plain_text()
 
