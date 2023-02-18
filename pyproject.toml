@@ -15,9 +15,6 @@ dependencies = [
     "nonebot_plugin_apscheduler",
     "EdgeGPT>=0.0.48",
 ]
-"packages" = [
-        "nonebot_plugin_bing_chat",
-]
 
 [project.urls]
 Homepage = "https://github.com/Harry-Jing/nonebot-plugin-bing-chat"
