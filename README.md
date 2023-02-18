@@ -6,7 +6,7 @@
 
 <div align="center">
 
-# nonebot-plugin-example
+# nonebot-plugin-bing-chat
 
 _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 
