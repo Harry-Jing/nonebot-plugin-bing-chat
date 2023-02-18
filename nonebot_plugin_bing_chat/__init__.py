@@ -28,18 +28,27 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
         logger.debug(helpMessage())
         await command_chat.finish(helpMessage())
 
+    #检查权限
+    if plugin_config['bingchat_allow_group'] == False and isinstance(event, GroupMessageEvent):
+        logger.info('组织群内消息')
+        return 
+
     user_input_text = arg.extract_plain_text()
 
     if event.sender.user_id in user_data_dict:
         chatbot = user_data_dict[event.sender.user_id].chatbot
     else:
-        chatbot = Chatbot(cookiePath='./data/BingChat/cookies.json')
-        user_data_dict[event.sender.user_id] = UserData(sender=event.sender, chatbot=chatbot)
+        try:
+            chatbot = Chatbot(cookiePath='./data/BingChat/cookies.json')
+            user_data_dict[event.sender.user_id] = UserData(sender=event.sender, chatbot=chatbot)
+        except Exception as exc:
+            await command_chat.send(f'<无法创建Chatbot>\n{exc}')
+            raise exc
 
     try:
         response = await chatbot.ask(prompt=user_input_text)
     except Exception as exc:
-        await command_chat.send('<大概率是网络出错了>\n建议使用 “{{命令符号}}刷新对话” 来重置')
+        await command_chat.send(f'<无法询问>\n{exc}')
         raise exc
 
     logger.debug(response)
@@ -56,5 +65,7 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
             user_data_dict[event.sender.user_id].chatbot.close()
             del user_data_dict[event.sender.user_id]
             await command_new_chat.send('已刷新对话')
+        else:
+            await command_new_chat.send('没有找到可以刷新的对话')
     else:
         await command_new_chat.send('不要再命令后加别的内容')

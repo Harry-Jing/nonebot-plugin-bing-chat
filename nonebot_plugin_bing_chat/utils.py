@@ -4,9 +4,15 @@ from typing import Any, Optional
 from EdgeGPT import Chatbot
 from pydantic import BaseModel
 
-from nonebot import Bot
-from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
+from nonebot import Bot, get_driver
+from nonebot.log import logger
+from nonebot.exception import FinishedException
+from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent, GroupMessageEvent
 from nonebot.adapters.onebot.v11.event import Sender
+
+from .config import Config
+
+plugin_config = Config.parse_obj(get_driver().config).dict()
 
 class BingChatResponse(BaseModel):
     raw: dict
@@ -38,7 +44,7 @@ def removeQuoteStr(string: str) -> str:
     return re.sub(r'\[\^\d\^\]', '', string)
 
 
-def replyContent(bot: Bot, user_data:UserData):
+def replyHistoryContent(bot: Bot, user_data:UserData):
 
     message = [
         MessageSegment.node_custom(
