@@ -18,9 +18,9 @@ from .utils import *
 
 user_data_dict: dict[int, UserData] = dict()
 
-command_chat = on_command(cmd = 'chat', aliases={'Chat', '聊天'})
-command_new_chat = on_command(cmd = 'refresh-chat', aliases={'刷新对话'})
 
+command_chat = on_command(cmd = plugin_config['bingchat_command_chat'][0], aliases=set(plugin_config['bingchat_command_chat'][1:]))
+command_new_chat = on_command(cmd = plugin_config['bingchat_command_new_chat'][0], aliases=set(plugin_config['bingchat_command_new_chat'][1:]))
 
 @command_chat.handle()
 async def _(event: MessageEvent, arg: Message = CommandArg()):
@@ -29,6 +29,10 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
         await command_chat.finish(helpMessage())
 
     #检查权限
+    if event.sub_type == 'group':
+        logger.info('无法再群临时对话聊进行')
+        await command_chat.finish()
+
     if plugin_config['bingchat_allow_group'] == False and isinstance(event, GroupMessageEvent):
         logger.info('无法再群聊进行')
         await command_chat.finish('无法再群聊进行')
