@@ -3,9 +3,7 @@ from EdgeGPT import Chatbot
 
 from nonebot import require
 require("nonebot_plugin_apscheduler")
-#require("nonebot_plugin_htmlrender")
 from nonebot_plugin_apscheduler import scheduler
-#from nonebot_plugin_htmlrender import md_to_pic
 
 from nonebot import Bot, get_driver
 from nonebot.log import logger

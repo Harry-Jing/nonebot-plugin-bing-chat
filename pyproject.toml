@@ -11,7 +11,6 @@ requires-python = ">=3.10"
 dependencies = [
     "nonebot2>=2.0.0b4",
     "nonebot-adapter-onebot>=2.2.0",
-    "nonebot_plugin_htmlrender",
     "nonebot_plugin_apscheduler",
     "EdgeGPT>=0.0.48",
 ]
