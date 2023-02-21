@@ -12,12 +12,12 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 
 
 <a href="./LICENSE">
-    <img src="https://img.shields.io/github/license/Harry-Jing/nonebot-plugin-bing-chat.svg" alt="license">
+    <img src="https://img.shields.io/github/license/Harry-Jing/nonebot-plugin-bing-chat.svg" alt="license" />
 </a>
 <a href="https://pypi.python.org/pypi/nonebot-plugin-bing-chat">
-    <img src="https://img.shields.io/pypi/v/nonebot-plugin-bing-chat.svg" alt="pypi">
+    <img src="https://img.shields.io/pypi/v/nonebot-plugin-bing-chat.svg" alt="pypi" />
 </a>
-<img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="python">
+<img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="python" />
 
 </div>
 
@@ -62,6 +62,7 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 - 打开 `cookie-editor` 插件
 - 点击右下角的 `Export` 按钮（这会把cookie保存到你的剪切板上）
 - 把你复制道德内容放到 `cookies.json` 文件里
+ <img src="https://raw.githubusercontent.com/Harry-Jing/nonebot-plugin-bing-chat/main/resources/How_to_export_cookies.png" max-height="100" alt="How_to_export_cookies" />
   
 </details>
 
