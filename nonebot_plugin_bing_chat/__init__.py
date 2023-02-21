@@ -35,7 +35,7 @@ async def bing_chat_command_chat(event: MessageEvent, arg: Message = CommandArg(
     is_valid_user, return_str = permissionsCheck(event=event)
     if not is_valid_user:
         logger.info(return_str)
-        command_chat.finish(return_str)
+        await command_chat.finish(return_str)
 
     user_input_text = arg.extract_plain_text()
 
