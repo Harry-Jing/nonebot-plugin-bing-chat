@@ -1,7 +1,7 @@
 [project]
 name = "nonebot-plugin-bing-chat"
 description = "基于nonebot2的bing-chat软件"
-version = "0.1.6a2"
+version = "0.1.7"
 authors = [
     {name = "Harry", email = "Harry0259@163.com"},
 ]
