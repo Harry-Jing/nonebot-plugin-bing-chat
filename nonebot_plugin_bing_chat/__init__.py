@@ -1,39 +1,41 @@
 import asyncio
 from EdgeGPT import Chatbot
 
-from nonebot import require
-require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
-
-from nonebot import Bot, get_driver
+from nonebot import Bot, require
 from nonebot.log import logger
 from nonebot.params import CommandArg
 from nonebot.plugin.on import on_command
-from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
+from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent, GroupMessageEvent
 
+require("nonebot_plugin_apscheduler")
+from nonebot_plugin_apscheduler import scheduler
+
+from .check import permissionsCheck
 from .utils import *
 
 
 user_data_dict: dict[int, UserData] = dict()
 
 
-command_chat = on_command(cmd = plugin_config['bingchat_command_chat'][0], aliases=set(plugin_config['bingchat_command_chat'][1:]))
-command_new_chat = on_command(cmd = plugin_config['bingchat_command_new_chat'][0], aliases=set(plugin_config['bingchat_command_new_chat'][1:]))
+command_chat = on_command(cmd = plugin_config['bingchat_command_chat'][0],
+    aliases = set(plugin_config['bingchat_command_chat'][1:])
+    )
+command_new_chat = on_command(cmd = plugin_config['bingchat_command_new_chat'][0], 
+    aliases = set(plugin_config['bingchat_command_new_chat'][1:])
+    )
+
 
 @command_chat.handle()
-async def _(event: MessageEvent, arg: Message = CommandArg()):
-    if not arg: #arg为空
+async def bing_chat_command_chat(event: MessageEvent, arg: Message = CommandArg()):
+    if not arg:  # arg为空
         logger.debug(helpMessage())
         await command_chat.finish(helpMessage())
 
-    #检查权限
-    if event.sub_type == 'group':
-        logger.info('无法再群临时对话聊进行')
-        await command_chat.finish()
-
-    if plugin_config['bingchat_allow_group'] == False and isinstance(event, GroupMessageEvent):
-        logger.info('无法再群聊进行')
-        await command_chat.finish('无法再群聊进行')
+    #检查权限并返回信息
+    is_valid_user, return_str = permissionsCheck(event=event)
+    if not is_valid_user:
+        logger.info(return_str)
+        command_chat.finish(return_str)
 
     user_input_text = arg.extract_plain_text()
 
@@ -59,10 +61,9 @@ async def _(event: MessageEvent, arg: Message = CommandArg()):
     await chatbot.close()
 
 
-
 @command_new_chat.handle()
-async def _(event: MessageEvent, arg: Message = CommandArg()):
-    if not arg: #arg为空
+async def bing_chat_command_new_chat(event: MessageEvent, arg: Message = CommandArg()):
+    if not arg:  # arg为空
         if event.sender.user_id in user_data_dict:
             user_data_dict[event.sender.user_id].chatbot.close()
             del user_data_dict[event.sender.user_id]

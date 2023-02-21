@@ -1,10 +1,20 @@
+from enum import Enum
+
 from pydantic import BaseModel, Extra, validator
 
+
+class filterMode(str, Enum):
+    whitelist = 'whitelist'
+    blacklist = 'blacklist'
+
+
 class Config(BaseModel, extra=Extra.ignore):
-    bingchat_output = 'text'
+    superusers: list[int] = []
     bingchat_command_chat: str | list[str] = ['chat']
     bingchat_command_new_chat: str | list[str] = ['刷新对话']
-    bingchat_allow_group = True
+    bingchat_group_filter_mode: filterMode = filterMode.blacklist
+    bingchat_group_filter_blacklist: list[int] = []
+    bingchat_group_filter_whitelist: list[int] = []
 
     @validator('bingchat_command_chat')
     def bingchat_command_chat_validator(cls, v):
