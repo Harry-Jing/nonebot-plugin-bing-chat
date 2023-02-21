@@ -73,9 +73,11 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 
 | 配置项 | 必填 | 类型 | 默认值 | 说明 |
 |:-----:|:----:|:-----:|:----:|:----:|
-| bingchat_allow_group | 否 | Bool | True | 是否允许在群聊中使用 |
 | bingchat_command_chat | 否 | str/list[str] | ['chat'] | 对话关键词 |
 | bingchat_command_new_chat | 否 | str/list[str] | ['刷新对话'] | 新建对话关键词 |
+| bingchat_group_filter_mode | 否 | 'whitelist'/'blacklist' | 'blacklist' | 对群聊屏蔽的模式 |
+| bingchat_group_filter_blacklist | 否 | list[int] | [] | 黑名单列表 |
+| bingchat_group_filter_whitelist | 否 | list[int] | [] | 白名单列表 |
   
 </details>
 
