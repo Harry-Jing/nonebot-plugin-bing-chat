@@ -26,7 +26,7 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 
 一个可以使用新版Bing进行聊天的插件
 
-目前正在完善更多的设置
+目前仅支持onebotv11
 
 ## 💿 安装
 
@@ -58,7 +58,7 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 - 在浏览器安装 `cookie-editor` 的插件 
   - [Chrome/Edge](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)（需要魔法）
   - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/)
-- 打开`bing.com`（需要魔法）
+- 打开[`www.bing.com`](https://www.bing.com/)（需要魔法）（**不是**`cn.bing.com`）
 - 打开 `cookie-editor` 插件
 - 点击右下角的 `Export` 按钮（这会把cookie保存到你的剪切板上）
 - 把你复制道德内容放到 `cookies.json` 文件里
@@ -96,9 +96,10 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
   
   - [ ] 支持更多的适配器
     - [x] onebot-v11
+    - [ ] 将来使用[`nonebot-plugin-all4one`](https://github.com/nonepkg/nonebot-plugin-all4one)对其他平台进行支持
   - [ ] 支持更好的权限管理
     - [ ] 每个人的次数限制
-    - [ ] 白名单/黑名单机制
+    - [x] 白名单/黑名单机制
   - [ ] 支持账号自动切换
   - [ ] 更好的错误处理
 
