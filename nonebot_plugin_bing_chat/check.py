@@ -21,3 +21,5 @@ def permissionsCheck(event: MessageEvent) -> tuple[bool, str | None]:
 
             case filterMode.whitelist:
                 return event.group_id in plugin_config['bingchat_group_filter_whitelist'], '此群组不在白名单'
+
+    return True, None
