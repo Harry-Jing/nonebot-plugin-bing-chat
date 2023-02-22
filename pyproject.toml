@@ -21,12 +21,10 @@ Homepage = "https://github.com/Harry-Jing/nonebot-plugin-bing-chat"
 
 [build-system]
 requires = [
-  "setuptools >= 65.5.0",
+  "setuptools >= 67.4.0",
 ]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-py-modules = ["nonebot_plugin_bing_chat"]
-
 [tool.setuptools.packages.find]
-where = ["nonebot_plugin_bing_chat"]
+where = ["."]
+include = ["nonebot_plugin_bing_chat"]
