@@ -11,7 +11,9 @@ class filterMode(str, Enum):
 class Config(BaseModel, extra=Extra.ignore):
     superusers: list[int] = []
     bingchat_command_chat: str | list[str] = ['chat']
-    bingchat_command_new_chat: str | list[str] = ['刷新对话']
+    bingchat_command_new_chat: str | list[str] = ['chat-new', '刷新对话']
+    bingchat_command_history_chat: str | list[str] = ['chat-history']
+    
     bingchat_group_filter_mode: filterMode = filterMode.blacklist
     bingchat_group_filter_blacklist: list[int] = []
     bingchat_group_filter_whitelist: list[int] = []
