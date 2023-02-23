@@ -22,7 +22,6 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 </div>
 
 
-> - ### 我自己犯傻了，没有把package在build的时候包含到里面，现已修复，请使用`nb plugin install nonebot-plugin-bing-chat --upgrade`在虚拟环境中进行更新
 > - ### 检查权限时有一个严重的错误，再`v0.2.2`中修复
 
 
