@@ -96,15 +96,10 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 ## 📄 ToDo
 
 <details>
-  
-  - [ ] 支持更多的适配器
-    - [x] onebot-v11
-    - [ ] 将来使用[`nonebot-plugin-all4one`](https://github.com/nonepkg/nonebot-plugin-all4one)对其他平台进行支持
+
   - [ ] 支持更好的权限管理
     - [ ] 每个人的次数限制
     - [x] 白名单/黑名单机制
-  - [ ] 支持账号自动切换
-  - [ ] 更好的错误处理
 
 </details>
 
