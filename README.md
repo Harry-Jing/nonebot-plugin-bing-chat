@@ -17,6 +17,7 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 <a href="https://pypi.python.org/pypi/nonebot-plugin-bing-chat">
     <img src="https://img.shields.io/pypi/v/nonebot-plugin-bing-chat.svg" alt="pypi" />
 </a>
+<img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/nonebot-plugin-bing-chat">
 <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="python" />
 
 </div>
