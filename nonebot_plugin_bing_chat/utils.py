@@ -44,9 +44,9 @@ class UserData(BaseModel):
 
 def helpMessage() -> MessageSegment:
     return (
-        '命令符号："#", "/", "."\n'
-        '开始对话：{{命令符号}} chat/Chat/聊天 + 内容\n'
-        '重置一个对话：{{命令符号}}refresh-chat/刷新对话'
+        f"""命令符号：{''.join(f'"{i}"' for i in plugin_config['command_start'])}\n"""
+        f"""开始对话：{{命令符号}}{'/'.join(i for i in plugin_config['bingchat_command_chat'])} + {{你要询问的内容}}\n"""
+        f"""重置一个对话：{{命令符号}}{'/'.join(i for i in plugin_config['bingchat_command_new_chat'])}"""
     )
 
 
