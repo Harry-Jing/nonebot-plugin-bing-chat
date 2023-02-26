@@ -55,9 +55,7 @@ async def bing_chat_command_chat(
     try:
         if event.sender.user_id in user_data_dict:
             current_user_data = user_data_dict[event.sender.user_id]
-            permissionsCheck(event=event, user_data=current_user_data)
         else:
-            permissionsCheck(event=event)
             current_user_data = UserData(
                 sender=event.sender,
                 chatbot=Chatbot(cookiePath='./data/BingChat/cookies.json'),
