@@ -40,7 +40,7 @@ QQ群：366731501
 ## 💿 安装
 
 <details>
-<summary> <b> 使用 nb-cli 安装（暂时有问题） </b> </summary>
+<summary> <b> 使用 nb-cli 安装 </b> </summary>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
 
     nb plugin install nonebot-plugin-bing-chat
