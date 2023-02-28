@@ -14,18 +14,6 @@ from ..exceptions import BaseBingChatException, BingChatResponseException
 from ..common.utils import *
 
 
-class BingChatResponse(BaseModel):
-    raw: dict
-
-    @property
-    def content_simple(self) -> str:
-        try:
-            return removeQuoteStr(self.raw["item"]["messages"][1]["text"])
-        except (IndexError, KeyError) as exc:
-            logger.error(self.raw)
-            raise BingChatResponseException('无法解析响应值内容') from exc
-
-
 class Conversation(BaseModel):
     ask: str
     reply: BingChatResponse
