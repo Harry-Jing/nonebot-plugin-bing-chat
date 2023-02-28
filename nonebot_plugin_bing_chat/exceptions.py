@@ -6,9 +6,21 @@ class BingChatPermissionDeniedException(BaseBingChatException):
     pass
 
 
+class BingChatGroupNotInListException(BingChatPermissionDeniedException):
+    pass
+
+
 class BingchatReachLimitException(BingChatPermissionDeniedException):
     pass
 
 
-class BingChatGroupPermissionDeniedException(BingChatPermissionDeniedException):
+class BingchatIsWaitingForResponseException(BingChatPermissionDeniedException):
+    pass
+
+
+class BingchatNetworkException(BaseBingChatException):
+    pass
+
+
+class BingChatResponseException(BingchatNetworkException):
     pass

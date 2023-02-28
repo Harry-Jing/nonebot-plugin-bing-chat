@@ -1,5 +1,4 @@
 from nonebot.log import logger
-from nonebot.matcher import Matcher
 from nonebot.adapters.onebot.v11 import (
     Message,
     MessageSegment,
@@ -7,12 +6,12 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
 )
 
-from .config import filterMode
+from ..config import filterMode
 from .utils import plugin_config, UserData
-from .exceptions import BingChatPermissionDeniedException
+from ..exceptions import *
 
 
-def permissionsCheck(event: MessageEvent, user_data: UserData = None) -> str:
+def CheckIfInList(event: MessageEvent) -> str:
     if event.sub_type == 'group':
         raise BingChatPermissionDeniedException('您没有权限，无法再群临时对话聊进行')
 
@@ -30,9 +29,13 @@ def permissionsCheck(event: MessageEvent, user_data: UserData = None) -> str:
                     event.group_id
                     not in plugin_config['bingchat_group_filter_whitelist']
                 ):
-                    raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单`')
+                    raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单')
 
-    if user_data:
-        user_data['bingchat_count'] += 1
+    return '在名单中'
 
-    return '权限检查通过'
+
+def CheckIfUserIsWaitingForResponse(event: MessageEvent, user_data: UserData) -> str:
+    if user_data.is_waiting:
+        raise BingchatIsWaitingForResponseException('您有一个对话正在进行中，请先等待回应')
+
+    return '用户没有对话在进行中'

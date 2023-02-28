@@ -1,6 +1,7 @@
 import re
-
+import time
 from typing import Any, Optional
+
 from EdgeGPT import Chatbot
 from pydantic import BaseModel, validator
 
@@ -15,7 +16,11 @@ from nonebot.adapters.onebot.v11 import (
 )
 from nonebot.adapters.onebot.v11.event import Sender
 
-from .config import Config
+
+from ..config import Config
+from ..exceptions import BaseBingChatException, BingChatResponseException
+
+from ..common.utils import *
 
 plugin_config = Config.parse_obj(get_driver().config).dict()
 
@@ -25,7 +30,11 @@ class BingChatResponse(BaseModel):
 
     @property
     def content_simple(self) -> str:
-        return removeQuoteStr(self.raw["item"]["messages"][1]["text"])
+        try:
+            return removeQuoteStr(self.raw["item"]["messages"][1]["text"])
+        except (IndexError, KeyError) as exc:
+            logger.error(self.raw)
+            raise BingChatResponseException('无法解析响应值内容') from exc
 
 
 class Conversation(BaseModel):
@@ -35,27 +44,32 @@ class Conversation(BaseModel):
 
 class UserData(BaseModel):
     sender: Sender
-    chatbot: Chatbot
-    history: list[Conversation] = list()
+
+    chatbot: Optional[Chatbot] = None
+    last_time: float = time.time()
+    is_waiting: bool = False
+    conversation_count: int = 0
+    history: list[Conversation] = []
 
     class Config:
         arbitrary_types_allowed = True
 
 
-def helpMessage() -> MessageSegment:
-    return (
-        f"""命令符号：{''.join(f'"{i}"' for i in plugin_config['command_start'])}\n"""
-        f"""开始对话：{{命令符号}}{'/'.join(i for i in plugin_config['bingchat_command_chat'])} + {{你要询问的内容}}\n"""
-        f"""重置一个对话：{{命令符号}}{'/'.join(i for i in plugin_config['bingchat_command_new_chat'])}"""
-    )
+def getUserDataSafe(
+    user_data_dict: dict[int, UserData], event: MessageEvent
+) -> UserData:
+    """获取该用户的user_data，如果没有则创建一个并返回"""
+    if event.sender.user_id in user_data_dict:
+        current_user_data = user_data_dict[event.sender.user_id]
+    else:
+        current_user_data = UserData(sender=event.sender)
+        user_data_dict[event.sender.user_id] = current_user_data
+
+    return current_user_data
 
 
 def replyOut(message_id: int, message_segment: MessageSegment | str) -> MessageSegment:
     return MessageSegment.reply(message_id) + message_segment
-
-
-def removeQuoteStr(string: str) -> str:
-    return re.sub(r'\[\^\d\^\]', '', string)
 
 
 def historyOut(bot: Bot, user_data: UserData):
