@@ -12,7 +12,7 @@ dependencies = [
     "nonebot2>=2.0.0b4",
     "nonebot-adapter-onebot>=2.2.0",
     "nonebot_plugin_apscheduler",
-    "EdgeGPT>=0.0.48",
+    "EdgeGPT=0.0.51",
 ]
 
 [project.urls]
