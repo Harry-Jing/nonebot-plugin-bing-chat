@@ -27,4 +27,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["nonebot_plugin_bing_chat"]
+include = ["nonebot_plugin_bing_chat*"]
