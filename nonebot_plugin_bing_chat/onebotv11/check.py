@@ -1,14 +1,14 @@
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import (
-    Message,
-    MessageSegment,
     MessageEvent,
+    PrivateMessageEvent,
     GroupMessageEvent,
 )
 
 from ..config import filterMode
-from .utils import plugin_config, UserData
 from ..exceptions import *
+
+from .utils import plugin_config, UserData
 
 
 def CheckIfInList(event: MessageEvent) -> str:

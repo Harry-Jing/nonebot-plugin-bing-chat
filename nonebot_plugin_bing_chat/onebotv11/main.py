@@ -50,7 +50,7 @@ async def bing_chat_command_chat(
     try:
         CheckIfInList(event=event)
     except BaseBingChatException as exc:
-        await matcher.finish(str(exc))
+        await matcher.finish(replyOut(event.message_id, str(exc)))
 
     current_user_data = getUserDataSafe(user_data_dict=user_data_dict, event=event)
 
@@ -58,7 +58,7 @@ async def bing_chat_command_chat(
     try:
         CheckIfUserIsWaitingForResponse(event=event, user_data=current_user_data)
     except BaseBingChatException as exc:
-        await matcher.finish(str(exc))
+        await matcher.finish(replyOut(event.message_id, str(exc)))
 
     # 创建Chatbot
     try:
@@ -67,7 +67,7 @@ async def bing_chat_command_chat(
                 cookiePath='./data/BingChat/cookies.json'
             )
     except Exception as exc:
-        await matcher.send(f'<无法创建Chatbot>\n{exc}')
+        await matcher.send(replyOut(event.message_id, f'<无法创建Chatbot>\n{exc}'))
         raise exc
     else:
         chatbot = current_user_data.chatbot
@@ -81,7 +81,7 @@ async def bing_chat_command_chat(
         # user_input_text = 'python的asyncio库是干什么的'
         # from ..example_data import response
     except Exception as exc:
-        await matcher.send(f'<无法询问>\n{exc}')
+        await matcher.send(replyOut(event.message_id, f'<无法询问>\n{exc}'))
         raise exc
     else:
         current_user_data.history.append(
@@ -99,7 +99,7 @@ async def bing_chat_command_chat(
             )
         )
     except BingChatResponseException as exc:
-        await matcher.finish(str(exc))
+        await matcher.finish(replyOut(event.message_id, f'<无法创建Chatbot>\n{str(exc)}'))
     finally:
         await chatbot.close()
 
@@ -112,11 +112,10 @@ async def bing_chat_command_new_chat(
     try:
         CheckIfInList(event=event)
     except BaseBingChatException as exc:
-        await matcher.finish(str(exc))
+        await matcher.finish(replyOut(event.message_id, str(exc)))
 
     current_user_data = getUserDataSafe(user_data_dict=user_data_dict, event=event)
 
-    await current_user_data.chatbot.close()
     current_user_data.sender = event.sender
     current_user_data.chatbot = None
     current_user_data.conversation_count = 0
@@ -141,7 +140,7 @@ async def bing_chat_command_history_chat(
     try:
         CheckIfInList(event=event)
     except BaseBingChatException as exc:
-        await matcher.finish(str(exc))
+        await matcher.finish(replyOut(event.message_id, str(exc)))
 
     current_user_data = getUserDataSafe(user_data_dict=user_data_dict, event=event)
 

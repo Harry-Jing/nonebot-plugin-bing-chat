@@ -1,28 +1,17 @@
-import re
 import time
 from typing import Any, Optional
 
 from EdgeGPT import Chatbot
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 
-from nonebot import Bot, get_driver
+from nonebot import Bot
 from nonebot.log import logger
-from nonebot.exception import FinishedException
-from nonebot.adapters.onebot.v11 import (
-    Message,
-    MessageSegment,
-    MessageEvent,
-    GroupMessageEvent,
-)
+from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent
 from nonebot.adapters.onebot.v11.event import Sender
 
-
-from ..config import Config
 from ..exceptions import BaseBingChatException, BingChatResponseException
 
 from ..common.utils import *
-
-plugin_config = Config.parse_obj(get_driver().config).dict()
 
 
 class BingChatResponse(BaseModel):

@@ -1,20 +1,10 @@
 import re
-import time
-from typing import Any, Optional
 
 from EdgeGPT import Chatbot
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 
-from nonebot import Bot, get_driver
+from nonebot import get_driver
 from nonebot.log import logger
-from nonebot.exception import FinishedException
-from nonebot.adapters.onebot.v11 import (
-    Message,
-    MessageSegment,
-    MessageEvent,
-    GroupMessageEvent,
-)
-from nonebot.adapters.onebot.v11.event import Sender
 
 from ..config import Config
 from ..exceptions import BaseBingChatException, BingChatResponseException
@@ -40,7 +30,7 @@ class Conversation(BaseModel):
     reply: BingChatResponse
 
 
-def helpMessage() -> MessageSegment:
+def helpMessage() -> str:
     return (
         f"""命令符号：{''.join(f'"{i}"' for i in plugin_config['command_start'])}\n"""
         f"""开始对话：{{命令符号}}{'/'.join(i for i in plugin_config['bingchat_command_chat'])} + {{你要询问的内容}}\n"""
