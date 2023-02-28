@@ -99,7 +99,8 @@ async def bing_chat_command_chat(
             )
         )
     except BingChatResponseException as exc:
-        await matcher.finish(replyOut(event.message_id, f'<无法创建Chatbot>\n{str(exc)}'))
+        logger.error(current_user_data.history[-1].reply.raw)
+        await matcher.finish(replyOut(event.message_id, f'<错误的返回值>\n{str(exc)}'))
     finally:
         await chatbot.close()
 
