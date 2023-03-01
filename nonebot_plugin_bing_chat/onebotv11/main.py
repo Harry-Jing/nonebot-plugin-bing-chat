@@ -84,6 +84,10 @@ async def bing_chat_command_chat(
     except BingChatAccountReachLimitException as exc:
         await matcher.finish(replyOut(event.message_id, f'<请尝联系管理员>\n{exc}'))
     except BingChatConversationReachLimitException as exc:
+        if plugin_config.bingchat_auto_refresh_conversation:
+            await matcher.send(replyOut(event.message_id, f'检测到达到对话上限，将自动刷新对话'))
+            await bing_chat_command_new_chat(bot=bot, event=event, matcher=matcher, arg=arg)
+            await matcher.finish()
         await matcher.finish(replyOut(event.message_id, f'<请尝试刷新>\n{exc}'))
     except BaseBingChatException as exc:
         await matcher.finish(replyOut(event.message_id, f'<处理响应值值时出错>\n{exc}'))
