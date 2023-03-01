@@ -42,21 +42,21 @@ QQ群：366731501
 >
 > 如果你有更多需求，请发布[issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues/new)让我知道
 
-## 💿 安装
+## 💿 安装与更新
 
 <details>
-<summary> <b> 使用 nb-cli 安装 </b> </summary>
+<summary> <b> 使用 nb-cli 安装与更新 </b> </summary>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
 
-    nb plugin install nonebot-plugin-bing-chat
+    nb plugin install nonebot-plugin-bing-chat --update
 
 </details>
 
 <details>
-<summary> <b> 使用包管理器安装 </b></summary>
+<summary> <b> 使用包管理器安装与更新 </b></summary>
 在 nonebot2 项目的插件目录下, 打开命令行, 根据你使用的包管理器, 输入相应的安装命令
 
-    pip install nonebot-plugin-bing-chat
+    pip install nonebot-plugin-bing-chat --update
 
 
 打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
