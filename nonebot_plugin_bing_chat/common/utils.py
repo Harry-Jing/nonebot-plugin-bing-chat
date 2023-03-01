@@ -33,4 +33,4 @@ def helpMessage() -> str:
 
 
 def removeQuoteStr(string: str) -> str:
-    return re.sub(r'\[\^\d\^\]', '', string)
+    return re.sub(r'\[\^\d+?\^\]', '', string)
