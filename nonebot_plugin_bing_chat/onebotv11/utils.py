@@ -9,14 +9,8 @@ from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent
 from nonebot.adapters.onebot.v11.event import Sender
 
-from ..exceptions import BaseBingChatException, BingChatResponseException
-
+from ..common.dataModel import *
 from ..common.utils import *
-
-
-class Conversation(BaseModel):
-    ask: str
-    reply: BingChatResponse
 
 
 class UserData(BaseModel):
@@ -46,10 +40,12 @@ def getUserDataSafe(
 
 
 def replyOut(message_id: int, message_segment: MessageSegment | str) -> MessageSegment:
+    """返回一个回复消息"""
     return MessageSegment.reply(message_id) + message_segment
 
 
-def historyOut(bot: Bot, user_data: UserData):
+def historyOut(bot: Bot, user_data: UserData) -> list[MessageSegment]:
+    """将历史记录输出到消息列表并返回"""
     messages = []
     for conversation in user_data.history:
         messages.append(
