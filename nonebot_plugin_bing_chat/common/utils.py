@@ -25,9 +25,9 @@ command_history_chat = on_command(
 
 def helpMessage() -> str:
     return (
-        f"""命令符号：{''.join(f'"{i}"' for i in plugin_config['command_start'])}\n"""
-        f"""开始对话：{{命令符号}}{'/'.join(i for i in plugin_config['bingchat_command_chat'])} + {{你要询问的内容}}\n"""
-        f"""重置一个对话：{{命令符号}}{'/'.join(i for i in plugin_config['bingchat_command_new_chat'])}"""
+        f"""命令符号：{''.join(f'"{i}"' for i in plugin_config.command_start)}\n"""
+        f"""开始对话：{{命令符号}}{'/'.join(i for i in plugin_config.bingchat_command_chat)} + {{你要询问的内容}}\n"""
+        f"""重置一个对话：{{命令符号}}{'/'.join(i for i in plugin_config.bingchat_command_new_chat)}"""
     )
 
 

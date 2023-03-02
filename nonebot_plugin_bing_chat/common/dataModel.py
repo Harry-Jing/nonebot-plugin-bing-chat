@@ -45,6 +45,10 @@ class Config(BaseModel, extra=Extra.ignore):
     @validator('bingchat_command_new_chat')
     def bingchat_command_new_chat_validator(cls, v):
         return list(v)
+    
+    @validator('bingchat_command_history_chat')
+    def bingchat_command_history_chat_validator(cls, v):
+        return list(v)
 
 
 class BingChatResponse(BaseModel):
