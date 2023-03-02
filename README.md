@@ -87,9 +87,9 @@ QQ群：366731501
 <b> 对默认的命令进行修改 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
 |:-----:|:-----:|:----:|:----:|
-| bingchat_command_chat | str/list[str] | ['chat'] | 对话命令 |
-| bingchat_command_new_chat | str/list[str] | ['chat-new', '刷新对话'] | 新建对话命令 |
-| bingchat_command_history_chat | str/list[str] | ['chat-history'] | 返回历史对话命令 |
+| bingchat_command_chat | str/list[str] | ["chat"] | 对话命令 |
+| bingchat_command_new_chat | str/list[str] | ["chat-new", "刷新对话"] | 新建对话命令 |
+| bingchat_command_history_chat | str/list[str] | ["chat-history"] | 返回历史对话命令 |
   
  <b> 对行为进行配置 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
@@ -99,7 +99,7 @@ QQ群：366731501
 <b> 对特定群聊进行屏蔽 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
 |:-----:|:-----:|:----:|:----:|
-| bingchat_group_filter_mode | 'whitelist'/'blacklist' | 'blacklist' | 对群聊屏蔽的模式 |
+| bingchat_group_filter_mode | "whitelist"/"blacklist" | "blacklist" | 对群聊屏蔽的模式 |
 | bingchat_group_filter_blacklist | list[int] | [] | 黑名单列表 |
 | bingchat_group_filter_whitelist | list[int] | [] | 白名单列表 |
   
