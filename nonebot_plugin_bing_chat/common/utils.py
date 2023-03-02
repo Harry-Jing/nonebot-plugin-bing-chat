@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 from nonebot import get_driver
 from nonebot.log import logger
@@ -31,6 +32,19 @@ def helpMessage() -> str:
     )
 
 
-
 def removeQuoteStr(string: str) -> str:
     return re.sub(r'\[\^\d+?\^\]', '', string)
+
+
+def initCookie():
+    directory = Path('./data/BingChat')
+    if not directory.exists():
+        directory.mkdir(parents=True)
+
+    file_path = directory.joinpath('cookies.json')
+
+    if not file_path.exists():
+        file_path.touch()
+
+    if file_path.stat().st_size == 0:
+        raise FileNotFoundError('BingChat插件未配置cookie，请在./data/BingChat/cookies.json中填入你的cookie')
