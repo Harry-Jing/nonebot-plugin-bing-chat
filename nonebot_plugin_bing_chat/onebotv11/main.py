@@ -65,7 +65,10 @@ async def bing_chat_command_chat(
         message_is_asking = await matcher.send(replyOut(event.message_id, '正在请求'))
         current_user_data.is_waiting = True
         user_input_text = arg.extract_plain_text()
-        response = await chatbot.ask(prompt=user_input_text)
+        response = await chatbot.ask(
+            prompt=user_input_text,
+            conversation_style=plugin_config.bingchat_conversation_style,
+        )
         # from ..example_data import get_example_response
         # user_input_text = 'python的asyncio库是干什么的'
         # response = get_example_response()
@@ -86,7 +89,9 @@ async def bing_chat_command_chat(
     except BingChatConversationReachLimitException as exc:
         if plugin_config.bingchat_auto_refresh_conversation:
             await matcher.send(replyOut(event.message_id, f'检测到达到对话上限，将自动刷新对话'))
-            await bing_chat_command_new_chat(bot=bot, event=event, matcher=matcher, arg=arg)
+            await bing_chat_command_new_chat(
+                bot=bot, event=event, matcher=matcher, arg=arg
+            )
             await matcher.finish()
         await matcher.finish(replyOut(event.message_id, f'<请尝试刷新>\n{exc}'))
     except BaseBingChatException as exc:
@@ -100,7 +105,6 @@ async def bing_chat_command_chat(
             )
         )
     except BingChatResponseException as exc:
-        logger.error(current_user_data.history[-1].reply.raw)
         await matcher.finish(
             replyOut(event.message_id, f'<调用content_simple时出错>\n{str(exc)}')
         )
