@@ -90,10 +90,12 @@ QQ群：366731501
 | bingchat_command_chat | str/list[str] | ["chat"] | 对话命令 |
 | bingchat_command_new_chat | str/list[str] | ["chat-new", "刷新对话"] | 新建对话命令 |
 | bingchat_command_history_chat | str/list[str] | ["chat-history"] | 返回历史对话命令 |
+| bingchat_command_to_me | bool | False | 所有命令是否需要@bot |
   
  <b> 对行为进行配置 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
 |:-----:|:-----:|:----:|:----:|
+| bingchat_conversation_style | Literal['creative', 'balanced', 'precise'] | "balanced" | 对话样式 |
 | bingchat_auto_refresh_conversation | bool | False | 到达命令上线后是否自动刷新 |
 
 <b> 对特定群聊进行屏蔽 </b>
