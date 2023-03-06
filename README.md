@@ -39,7 +39,7 @@ QQ群：366731501
 
 能否给孩子一个star🌟吗
 
-> 仅支持onebot v11
+> 目前仅支持onebot v11
 >
 > 如果你有更多需求，请发布[issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues/new)让我知道
 
@@ -119,12 +119,11 @@ QQ群：366731501
 
   
 ## 📄 ToDo
-
-<details>
   
-  如果你有更多需求，请发布[issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues/new)让我知道
+  准备添加的功能请查看[issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues)
+  
+  如果你有更多需求，请[发布新的issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues/new)让我知道
 
-</details>
 
 
   
