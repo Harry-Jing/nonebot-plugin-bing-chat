@@ -57,7 +57,7 @@ QQ群：366731501
 <summary> <b> 使用包管理器安装与更新 </b></summary>
 在 nonebot2 项目的插件目录下, 打开命令行, 根据你使用的包管理器, 输入相应的安装命令
 
-    pip install nonebot-plugin-bing-chat ---upgrade
+    pip install nonebot-plugin-bing-chat --upgrade
 
 
 打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
