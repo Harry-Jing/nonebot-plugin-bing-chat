@@ -1,6 +1,5 @@
 import re
 from time import strftime, localtime
-
 from pathlib import Path
 
 from nonebot import get_driver
@@ -69,7 +68,7 @@ def removeQuoteStr(string: str) -> str:
     return re.sub(r'\[\^\d+?\^\]', '', string)
 
 
-def initFile():
+def initFile() -> None:
     plugin_directory.mkdir(parents=True, exist_ok=True)
 
     # 检查cookie文件是否存在且不为空
@@ -85,6 +84,8 @@ def initFile():
     plugin_log_directory.mkdir(parents=True, exist_ok=True)
 
 
-def createLog():
+def createLog(data: str) -> None:
     current_log_directory = plugin_directory / 'log' / strftime("%Y-%m-%d", localtime())
     current_log_directory.mkdir(parents=True, exist_ok=True)
+    current_log_file = current_log_directory / f'{strftime("%H-%M-%S", localtime())}.log'
+    current_log_file.write_text(data=str(data), encoding='utf-8')

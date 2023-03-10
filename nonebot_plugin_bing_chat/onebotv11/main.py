@@ -35,7 +35,7 @@ async def bing_chat_command_chat(
     event: MessageEvent,
     matcher: Matcher,
     arg: Message = CommandArg(),
-    current_user_data: UserData = None,
+    user_data: Optional[UserData] = None,
 ):
     # 如果arg为空，则返回帮助信息
     if not arg:
@@ -47,9 +47,11 @@ async def bing_chat_command_chat(
     except BaseBingChatException as exc:
         await matcher.finish(replyOut(event.message_id, str(exc)))
 
-    if not current_user_data:
-        current_user_data: UserData = getUserDataSafe(
-            user_data_dict=user_data_dict, event=event
+    if user_data:
+        current_user_data = user_data
+    else:
+        current_user_data = user_data_dict.setdefault(
+            event.sender.user_id, UserData(sender=event.sender)
         )
 
     if not current_user_data.first_ask_message_id:
@@ -94,6 +96,8 @@ async def bing_chat_command_chat(
 
     # 检查后保存响应值
     try:
+        if plugin_config.bingchat_log:
+            createLog(str(response))
         current_user_data.history.append(
             Conversation(ask=user_input_text, reply=BingChatResponse(raw=response))
         )
@@ -136,7 +140,9 @@ async def bing_chat_command_new_chat(
     except BaseBingChatException as exc:
         await matcher.finish(replyOut(event.message_id, str(exc)))
 
-    current_user_data = getUserDataSafe(user_data_dict=user_data_dict, event=event)
+    current_user_data = user_data_dict.setdefault(
+        event.sender.user_id, UserData(sender=event.sender)
+    )
 
     current_user_data.sender = event.sender
     current_user_data.chatbot = None
@@ -164,19 +170,20 @@ async def bing_chat_command_history_chat(
     except BaseBingChatException as exc:
         await matcher.finish(replyOut(event.message_id, str(exc)))
 
-    current_user_data = getUserDataSafe(user_data_dict=user_data_dict, event=event)
+    current_user_data = user_data_dict.setdefault(
+        event.sender.user_id, UserData(sender=event.sender)
+    )
 
     # 如果该用户没有历史记录则终止
     if not current_user_data.history:
         await matcher.finish(replyOut(event.message_id, '您没有历史对话'))
 
-    current_user_data = user_data_dict[event.sender.user_id]
     nodes = historyOut(bot, current_user_data)
 
     if isinstance(event, GroupMessageEvent):
         await bot.send_group_forward_msg(group_id=event.group_id, messages=nodes)
     if isinstance(event, PrivateMessageEvent):
-        await bot.send_private_forward_msg(user_id=event.user_id, messages=nodes)
+        await bot.send_private_forward_msg(user_id=event.sender.user_id, messages=nodes)
 
 
 @message_all.handle()
@@ -196,9 +203,9 @@ async def bing_chat_message_all(
     logger.debug(reply_message_id_dict[event.reply.message_id])
     if (
         not plugin_config.bingchat_share_chat
-        and event.user_id != reply_message_id_dict[event.reply.message_id]
+        and event.sender.user_id != reply_message_id_dict[event.reply.message_id]
     ):
-        logger.error(f'用户{event.user_id}试图继续别人的对话')
+        logger.error(f'用户{event.sender.user_id}试图继续别人的对话')
 
     # 获取最开始发送的用户书数据
     current_user_data = user_data_dict[reply_message_id_dict[event.reply.message_id]]
@@ -208,5 +215,5 @@ async def bing_chat_message_all(
         event=event,
         matcher=matcher,
         arg=arg,
-        current_user_data=current_user_data,
+        user_data=current_user_data,
     )

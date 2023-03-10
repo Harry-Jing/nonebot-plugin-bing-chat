@@ -29,19 +29,6 @@ class UserData(BaseModel):
         arbitrary_types_allowed = True
 
 
-def getUserDataSafe(
-    user_data_dict: dict[int, UserData], event: MessageEvent
-) -> UserData:
-    """获取该用户的user_data，如果没有则创建一个并返回"""
-    if event.sender.user_id in user_data_dict:
-        current_user_data = user_data_dict[event.sender.user_id]
-    else:
-        current_user_data = UserData(sender=event.sender)
-        user_data_dict[event.sender.user_id] = current_user_data
-
-    return current_user_data
-
-
 def replyOut(message_id: int, message_segment: MessageSegment | str) -> Message:
     """返回一个回复消息"""
     return MessageSegment.reply(message_id) + message_segment
