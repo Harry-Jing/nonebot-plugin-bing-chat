@@ -25,17 +25,15 @@ class Config(BaseModel, extra=Extra.ignore):
     superusers: list[int] = []
     command_start: list[str] = ['']
 
-    bingchat_conversation_style: Literal['creative', 'balanced', 'precise'] = 'balanced'
-
     bingchat_command_chat: list[str] = ['chat']
     bingchat_command_new_chat: list[str] = ['chat-new', '刷新对话']
     bingchat_command_history_chat: list[str] = ['chat-history']
     bingchat_to_me: bool = False
+    bingchat_share_chat: bool = False
 
-    bingchat_auto_refresh_conversation: bool = False
-
-    bingchat_limit_rate: Optional[int] = None  # 未实现
-    bingchat_limit_count: Optional[int] = None  # 未实现
+    bingchat_log: bool = False
+    bingchat_auto_refresh_conversation: bool = True
+    bingchat_conversation_style: Literal['creative', 'balanced', 'precise'] = 'balanced'
 
     bingchat_group_filter_mode: filterMode = filterMode.blacklist
     bingchat_group_filter_blacklist: list[int] = []
@@ -65,26 +63,49 @@ class BingChatResponse(BaseModel):
 
     @validator('raw')
     def rawValidator(cls, v):
-        match v['item']['result']['value']:
-            case 'Success':
-                num_conver = v['item']['throttling']['numUserMessagesInConversation']
-                max_conver = v['item']['throttling']['maxNumUserMessagesInConversation']
-                if num_conver > max_conver:
-                    raise BingChatConversationReachLimitException(
-                        f'<达到对话上限>\n最大对话次数：{max_conver}\n你的话次数：{num_conver}'
-                    )
-                if 'hiddenText' in v['item']['messages'][1]:
-                    raise BingChatResponseException(
-                        f'<Bing检测到敏感问题，无法回答>\n'
-                        f'{v["item"]["messages"][1]["hiddenText"]}'
-                    )
-                return v
-
-            case 'Throttled':
+        match v:
+            case {'item': {'result': {'value': 'Throttled'}}}:
                 logger.error('<Bing账号到达今日请求上限>')
                 raise BingChatAccountReachLimitException('<Bing账号到达今日请求上限>')
-        logger.error('<未知的错误>')
-        raise BingChatResponseException('<未知的错误, 请管理员查看控制台>')
+
+            case {
+                'item': {
+                    'result': {'value': 'Success'},
+                    'throttling': {
+                        'numUserMessagesInConversation': num_conver,
+                        'maxNumUserMessagesInConversation': max_conver,
+                    },
+                }
+            } if num_conver > max_conver:
+                raise BingChatConversationReachLimitException(
+                    f'<达到对话上限>\n最大对话次数：{max_conver}\n你的话次数：{num_conver}'
+                )
+
+            case {
+                'item': {
+                    'result': {'value': 'Success'},
+                    'messages': [
+                        _,
+                        {'hiddenText': hiddenText},
+                    ],
+                }
+            }:
+                raise BingChatResponseException(f'<Bing检测到敏感问题，无法回答>\n{hiddenText}')
+
+            case {
+                'item': {
+                    'result': {'value': 'Success'},
+                    'messages': [
+                        _,
+                        {'text': text},
+                    ],
+                }
+            }:
+                return v
+
+            case _:
+                logger.error('<未知的错误>')
+                raise BingChatResponseException('<未知的错误, 请管理员查看控制台>')
 
     @property
     def content_simple(self) -> str:
@@ -92,6 +113,14 @@ class BingChatResponse(BaseModel):
 
         try:
             return removeQuoteStr(self.raw["item"]["messages"][1]["text"])
+        except (IndexError, KeyError) as exc:
+            logger.error(self.raw)
+            raise BingChatResponseException('<无效的响应值, 请管理员查看控制台>') from exc
+
+    @property
+    def content_with_reference(self) -> str:
+        try:
+            return self.raw["item"]["messages"][1]["text"]
         except (IndexError, KeyError) as exc:
             logger.error(self.raw)
             raise BingChatResponseException('<无效的响应值, 请管理员查看控制台>') from exc
