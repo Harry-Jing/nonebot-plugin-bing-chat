@@ -25,15 +25,16 @@ class Config(BaseModel, extra=Extra.ignore):
     superusers: list[int] = []
     command_start: list[str] = ['']
 
+    bingchat_to_me: bool = False
+    bingchat_share_chat: bool = False
     bingchat_command_chat: list[str] = ['chat']
     bingchat_command_new_chat: list[str] = ['chat-new', '刷新对话']
     bingchat_command_history_chat: list[str] = ['chat-history']
-    bingchat_to_me: bool = False
-    bingchat_share_chat: bool = False
 
     bingchat_log: bool = False
-    bingchat_auto_refresh_conversation: bool = True
+    bingchat_show_is_waiting: bool = True
     bingchat_conversation_style: Literal['creative', 'balanced', 'precise'] = 'balanced'
+    bingchat_auto_refresh_conversation: bool = True
 
     bingchat_group_filter_mode: filterMode = filterMode.blacklist
     bingchat_group_filter_blacklist: list[int] = []
