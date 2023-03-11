@@ -48,7 +48,7 @@ def helpMessage() -> str:
         f"""\n\n"""
         f"""新建一个对话：{'/'.join(i for i in plugin_config.bingchat_command_new_chat)}"""
         f"""\n\n"""
-        f"""查看历史记录：{'/'.join(i for i in plugin_config.bingchat_command_new_chat)}"""
+        f"""查看历史记录：{'/'.join(i for i in plugin_config.bingchat_command_history_chat)}"""
         f"""\n\n"""
         f"""如果有任何疑问请查看https://github.com/Harry-Jing/nonebot-plugin-bing-chat"""
     )
