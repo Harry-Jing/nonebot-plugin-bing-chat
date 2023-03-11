@@ -5,7 +5,7 @@ from pathlib import Path
 from nonebot import get_driver
 from nonebot.log import logger
 from nonebot.rule import Rule, command, to_me
-from nonebot.plugin.on import on_message, on_regex
+from nonebot.plugin.on import on_message
 
 from .dataModel import Config
 
@@ -17,16 +17,19 @@ plugin_directory = Path('./data/BingChat')
 command_chat = on_message(
     rule=command(*set(plugin_config.bingchat_command_chat))
     & (to_me() if plugin_config.bingchat_to_me else Rule()),
+    block=False,
 )
 command_new_chat = on_message(
     rule=command(*set(plugin_config.bingchat_command_new_chat))
     & (to_me() if plugin_config.bingchat_to_me else Rule()),
+    block=False,
 )
 command_history_chat = on_message(
     rule=command(*set(plugin_config.bingchat_command_history_chat))
     & (to_me() if plugin_config.bingchat_to_me else Rule()),
+    block=False,
 )
-message_all = on_message()
+message_all = on_message(block=False)
 
 
 _matcher_in_regex = '|'.join(
