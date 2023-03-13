@@ -118,11 +118,18 @@ async def bing_chat_command_chat(
 
     # 发送响应值
     try:
-        data = await matcher.send(
-            replyOut(
-                event.message_id, current_user_data.history[-1].reply.content_simple
+        if plugin_config.bingchat_show_detail:
+            data = await matcher.send(
+                replyOut(
+                    event.message_id, current_user_data.history[-1].reply.content_with_reference
+                )
             )
-        )
+        else:
+            data = await matcher.send(
+                replyOut(
+                    event.message_id, current_user_data.history[-1].reply.content_simple
+                )
+            )
         reply_message_id_dict[data['message_id']] = current_user_data.sender.user_id
     except BingChatResponseException as exc:
         await matcher.finish(

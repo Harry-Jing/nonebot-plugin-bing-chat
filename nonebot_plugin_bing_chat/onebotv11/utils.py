@@ -53,3 +53,8 @@ def historyOut(bot: Bot, user_data: UserData) -> list[MessageSegment]:
             )
         )
     return nodes
+
+
+def detailOut(bot: Bot, raw: dict) -> list[MessageSegment]:
+    nodes = []
+    return nodes
