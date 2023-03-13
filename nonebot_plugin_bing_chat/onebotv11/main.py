@@ -1,5 +1,3 @@
-from EdgeGPT import Chatbot
-
 from nonebot import Bot
 from nonebot.log import logger
 from nonebot.params import CommandArg, EventMessage

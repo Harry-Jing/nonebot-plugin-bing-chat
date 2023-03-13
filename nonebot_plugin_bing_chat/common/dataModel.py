@@ -3,7 +3,6 @@ from enum import Enum
 from typing import Optional, Literal
 from pathlib import Path
 
-from EdgeGPT import Chatbot
 from pydantic import BaseModel, Extra, validator
 
 from nonebot.log import logger

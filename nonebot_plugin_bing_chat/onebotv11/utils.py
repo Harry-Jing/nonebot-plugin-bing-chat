@@ -1,7 +1,8 @@
 import time
 from typing import Any, Optional
 
-from EdgeGPT import Chatbot
+# from EdgeGPT import Chatbot
+from ..common.bing import Chatbot
 from pydantic import BaseModel
 
 from nonebot import Bot
