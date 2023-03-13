@@ -16,6 +16,8 @@ dependencies = [
     "EdgeGPT>=0.0.56.1",
 ]
 classifiers=[
+        "Framework :: Pydantic",
+        "Topic :: Communications",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
