@@ -9,7 +9,7 @@ readme = "README.md"
 license = {text = "GPL-3"}
 requires-python = ">=3.10"
 dependencies = [
-    "httpx"
+    "httpx",
     "nonebot2>=2.0.0b4",
     "nonebot-adapter-onebot>=2.2.0",
     "nonebot_plugin_apscheduler",
