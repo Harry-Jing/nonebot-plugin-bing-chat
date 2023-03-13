@@ -7,13 +7,16 @@ from pydantic import BaseModel, Extra, validator
 
 from nonebot.log import logger
 
-
 from .exceptions import (
     BaseBingChatException,
     BingChatResponseException,
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
 )
+
+
+def removeQuoteStr(string: str) -> str:
+    return re.sub(r'\[\^\d+?\^\]', '', string)
 
 
 class filterMode(str, Enum):
@@ -72,6 +75,7 @@ class Config(BaseModel, extra=Extra.ignore):
     def bingchat_plugin_directory_validator(cls, v) -> Path:
         return Path(v)
 
+
 class BingChatResponse(BaseModel):
     raw: dict
 
@@ -123,8 +127,6 @@ class BingChatResponse(BaseModel):
 
     @property
     def content_simple(self) -> str:
-        from .utils import removeQuoteStr
-
         try:
             return removeQuoteStr(self.raw["item"]["messages"][1]["text"])
         except (IndexError, KeyError) as exc:
@@ -134,7 +136,9 @@ class BingChatResponse(BaseModel):
     @property
     def content_with_reference(self) -> str:
         try:
-            return self.raw["item"]["messages"][1]["adaptiveCards"][0]['body'][0]['text']
+            return removeQuoteStr(
+                self.raw["item"]["messages"][1]["adaptiveCards"][0]['body'][0]['text']
+            )
         except (IndexError, KeyError) as exc:
             logger.error(self.raw)
             raise BingChatResponseException('<无效的响应值, 请管理员查看控制台>') from exc
@@ -150,7 +154,7 @@ class BingChatResponse(BaseModel):
         except (IndexError, KeyError) as exc:
             logger.error(self.raw)
             raise BingChatResponseException('<无效的响应值, 请管理员查看控制台>') from exc
-    
+
 
 class Conversation(BaseModel):
     ask: str

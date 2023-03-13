@@ -1,6 +1,5 @@
 import re
 from time import strftime, localtime
-from pathlib import Path
 
 from nonebot import get_driver, require
 from nonebot.log import logger
@@ -79,10 +78,6 @@ def helpMessage() -> str:
         ) + help_message
 
     return help_message
-
-
-def removeQuoteStr(string: str) -> str:
-    return re.sub(r'\[\^\d+?\^\]', '', string)
 
 
 def initFile() -> None:

@@ -1,3 +1,7 @@
+from typing import Optional
+
+from EdgeGPT import Chatbot
+
 from nonebot import Bot
 from nonebot.log import logger
 from nonebot.params import CommandArg, EventMessage
@@ -14,11 +18,30 @@ from nonebot_plugin_apscheduler import scheduler
 
 from ..common.exceptions import (
     BaseBingChatException,
+    BingChatResponseException,
+    BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
 )
-
+from ..common.utils import (
+    plugin_config,
+    command_chat,
+    command_new_chat,
+    command_history_chat,
+    message_all,
+    createLog,
+    helpMessage,
+    isConfilctWithOtherMatcher,
+)
+from ..common.dataModel import (
+    Conversation,
+    BingChatResponse,
+)
 from .check import CheckIfInList, CheckIfUserIsWaitingForResponse
-from .utils import *
+from .utils import (
+    replyOut,
+    historyOut,
+    UserData,
+)
 
 # dict[user_id, UserData] user_id: d
 user_data_dict: dict[int, UserData] = dict()
@@ -119,7 +142,8 @@ async def bing_chat_command_chat(
         if plugin_config.bingchat_show_detail:
             data = await matcher.send(
                 replyOut(
-                    event.message_id, current_user_data.history[-1].reply.content_with_reference
+                    event.message_id,
+                    current_user_data.history[-1].reply.content_with_reference,
                 )
             )
         else:

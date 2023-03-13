@@ -1,8 +1,7 @@
 import time
 from typing import Any, Optional
 
-# from EdgeGPT import Chatbot
-from ..common.bing import Chatbot
+from EdgeGPT import Chatbot
 from pydantic import BaseModel
 
 from nonebot import Bot
@@ -10,13 +9,12 @@ from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
 from nonebot.adapters.onebot.v11.event import Sender
 
-from ..common.dataModel import *
-from ..common.utils import *
+from ..common.dataModel import Conversation
 
 
 class UserData(BaseModel):
     sender: Sender
-    
+
     first_ask_message_id: Optional[int] = None
     last_reply_message_id: int = 0
 
