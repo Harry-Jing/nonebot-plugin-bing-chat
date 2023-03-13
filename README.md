@@ -26,8 +26,7 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 </div>
 
 
-> ### 在 0.6.0-alpha.2 紧急临时修复重定向的问题，使用 `pip install nonebot-plugin-bing-chat --pre -i https://pypi.org/simple` 来获取更新
->
+> ### 在 0.6.0-alpha.3 修复重定向的问题，使用 `pip install nonebot-plugin-bing-chat==0.6.0a3 -i https://pypi.org/simple` 来获取更新
 
 
 ## 📖 介绍
