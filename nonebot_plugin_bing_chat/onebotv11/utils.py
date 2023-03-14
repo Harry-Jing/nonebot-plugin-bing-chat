@@ -66,7 +66,7 @@ def detailOut(bot: Bot, raw: dict) -> list[MessageSegment]:
     return nodes
 
 
-# dict[user_id, UserData] user_id: d
+# dict[user_id, UserData] user_id: UserData
 user_data_dict: dict[int, UserData] = dict()
 
 # dict[message_id, user_id] bot回答的问题的message_id: 对应的用户的user_id
@@ -76,6 +76,7 @@ reply_message_id_dict: dict[int, int] = dict()
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
     if (
         not to_me
+        or not event.reply
         or event.reply.message_id not in reply_message_id_dict
         or isConfilctWithOtherMatcher(event.message.extract_plain_text())
     ):
