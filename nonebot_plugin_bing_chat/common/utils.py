@@ -1,5 +1,6 @@
 import re
-from time import strftime, localtime
+import shutil
+from datetime import datetime, timedelta
 
 from nonebot import get_driver, require
 from nonebot.log import logger
@@ -34,7 +35,9 @@ command_history_chat = on_message(
     priority=plugin_config.bingchat_priority,
     block=plugin_config.bingchat_block,
 )
-message_all = on_message(
+
+matcher_reply_to_me = on_message(
+    rule=to_me(),
     priority=plugin_config.bingchat_priority,
     block=plugin_config.bingchat_block,
 )
@@ -47,11 +50,6 @@ _matcher_in_regex = '|'.join(
         f"""(({'|'.join(plugin_config.bingchat_command_start)})({'|'.join(plugin_config.bingchat_command_history_chat)}).*)""",
     )
 )
-
-
-@scheduler.scheduled_job('cron', hour=2)
-async def run_every_day() -> None:
-    pass
 
 
 def isConfilctWithOtherMatcher(msg: str) -> bool:
@@ -97,9 +95,21 @@ def initFile() -> None:
 
 
 def createLog(data: str) -> None:
-    current_log_directory = plugin_directory / 'log' / strftime("%Y-%m-%d", localtime())
+    current_log_directory = (
+        plugin_directory / 'log' / datetime.now().strftime('%Y-%m-%d')
+    )
     current_log_directory.mkdir(parents=True, exist_ok=True)
     current_log_file = (
-        current_log_directory / f'{strftime("%H-%M-%S", localtime())}.log'
+        current_log_directory / f'{datetime.now().strftime("%H-%M-%S")}.log'
     )
     current_log_file.write_text(data=str(data), encoding='utf-8')
+
+
+@scheduler.scheduled_job('cron', hour=2)
+async def _del_log_file() -> None:
+    print('del_log_file')
+    current_time = datetime.now()
+    plugin_log_directory = plugin_directory / 'log'
+    for child_dir in plugin_log_directory.iterdir():
+        if current_time - datetime.fromisoformat(child_dir.name) > timedelta(days=7):
+            shutil.rmtree(child_dir)

@@ -27,10 +27,9 @@ from ..common.utils import (
     command_chat,
     command_new_chat,
     command_history_chat,
-    message_all,
+    matcher_reply_to_me,
     createLog,
     helpMessage,
-    isConfilctWithOtherMatcher,
 )
 from ..common.dataModel import (
     Conversation,
@@ -38,20 +37,17 @@ from ..common.dataModel import (
 )
 from .check import CheckIfInList, CheckIfUserIsWaitingForResponse
 from .utils import (
+    user_data_dict,
+    reply_message_id_dict,
     replyOut,
     historyOut,
+    matcher_reply_to_continue_chat,
     UserData,
 )
 
-# dict[user_id, UserData] user_id: d
-user_data_dict: dict[int, UserData] = dict()
-
-# dict[message_id, user_id] bot回答的问题的message_id: 对应的用户的user_id
-reply_message_id_dict: dict[int, int] = dict()
-
 
 @command_chat.handle()
-async def bing_chat_command_chat(
+async def bingchat_command_chat(
     bot: Bot,
     event: MessageEvent,
     matcher: Matcher,
@@ -129,7 +125,7 @@ async def bing_chat_command_chat(
     except BingChatConversationReachLimitException as exc:
         if plugin_config.bingchat_auto_refresh_conversation:
             await matcher.send(replyOut(event.message_id, f'检测到达到对话上限，将自动刷新对话'))
-            await bing_chat_command_new_chat(
+            await bingchat_command_new_chat(
                 bot=bot, event=event, matcher=matcher, arg=arg
             )
             await matcher.finish()
@@ -162,7 +158,7 @@ async def bing_chat_command_chat(
 
 
 @command_new_chat.handle()
-async def bing_chat_command_new_chat(
+async def bingchat_command_new_chat(
     bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
 ):
     # 检查用户和群组是否在名单中，如果没有则终止
@@ -184,11 +180,11 @@ async def bing_chat_command_new_chat(
 
     # 如果arg不为空
     if arg:
-        await bing_chat_command_chat(bot=bot, event=event, matcher=matcher, arg=arg)
+        await bingchat_command_chat(bot=bot, event=event, matcher=matcher, arg=arg)
 
 
 @command_history_chat.handle()
-async def bing_chat_command_history_chat(
+async def bingchat_command_history_chat(
     bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
 ):
     # 如果arg不为空
@@ -217,19 +213,10 @@ async def bing_chat_command_history_chat(
         await bot.send_private_forward_msg(user_id=event.sender.user_id, messages=nodes)
 
 
-@message_all.handle()
-async def bing_chat_message_all(
+@matcher_reply_to_continue_chat.handle()
+async def bingchat_message_all(
     bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = EventMessage()
 ):
-    # 检查是否是回复消息、是否是对bot的回复、回复的id是否被记录过、是否与本插件的其他Mather冲突
-    if (
-        not event.reply
-        or event.reply.sender.user_id != int(bot.self_id)
-        or event.reply.message_id not in reply_message_id_dict
-        or isConfilctWithOtherMatcher(arg.extract_plain_text())
-    ):
-        await matcher.finish()
-
     # 检查是否回复的是自己的对话
     logger.debug(reply_message_id_dict[event.reply.message_id])
     if (
@@ -238,10 +225,10 @@ async def bing_chat_message_all(
     ):
         logger.error(f'用户{event.sender.user_id}试图继续别人的对话')
 
-    # 获取最开始发送的用户书数据
+    # 获取最开始发送的用户数据
     current_user_data = user_data_dict[reply_message_id_dict[event.reply.message_id]]
 
-    await bing_chat_command_chat(
+    await bingchat_command_chat(
         bot=bot,
         event=event,
         matcher=matcher,

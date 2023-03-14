@@ -45,8 +45,8 @@ class Config(BaseModel, extra=Extra.ignore):
     bingchat_auto_refresh_conversation: bool = True
 
     bingchat_group_filter_mode: filterMode = filterMode.blacklist
-    bingchat_group_filter_blacklist: set[int] = {}
-    bingchat_group_filter_whitelist: set[int] = {}
+    bingchat_group_filter_blacklist: set[Optional[int]] = set()
+    bingchat_group_filter_whitelist: set[Optional[int]] = set()
 
     def __init__(self, **data) -> None:
         if not 'bingchat_command_start' in data:
@@ -145,7 +145,7 @@ class BingChatResponse(BaseModel):
 
     @property
     def content_detail(self) -> str:
-        ...
+        return ''
 
     @property
     def adaptive_cards(self) -> list:

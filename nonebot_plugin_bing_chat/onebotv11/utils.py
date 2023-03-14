@@ -6,10 +6,17 @@ from pydantic import BaseModel
 
 from nonebot import Bot
 from nonebot.log import logger
+from nonebot.rule import Rule, to_me
+from nonebot.params import EventToMe
+from nonebot.plugin.on import on_message
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
 from nonebot.adapters.onebot.v11.event import Sender
 
 from ..common.dataModel import Conversation
+from ..common.utils import (
+    plugin_config,
+    isConfilctWithOtherMatcher,
+)
 
 
 class UserData(BaseModel):
@@ -57,3 +64,27 @@ def historyOut(bot: Bot, user_data: UserData) -> list[MessageSegment]:
 def detailOut(bot: Bot, raw: dict) -> list[MessageSegment]:
     nodes = []
     return nodes
+
+
+# dict[user_id, UserData] user_id: d
+user_data_dict: dict[int, UserData] = dict()
+
+# dict[message_id, user_id] bot回答的问题的message_id: 对应的用户的user_id
+reply_message_id_dict: dict[int, int] = dict()
+
+
+def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
+    if (
+        not to_me
+        or event.reply.message_id not in reply_message_id_dict
+        or isConfilctWithOtherMatcher(event.message.extract_plain_text())
+    ):
+        return False
+    return True
+
+
+matcher_reply_to_continue_chat = on_message(
+    rule=Rule(_rule_continue_chat),
+    priority=plugin_config.bingchat_priority,
+    block=plugin_config.bingchat_block,
+)
