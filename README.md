@@ -10,7 +10,6 @@
 
 _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 
-
 <a href="./LICENSE">
   <img src="https://img.shields.io/github/license/Harry-Jing/nonebot-plugin-bing-chat.svg" alt="license" />
 </a>
@@ -24,10 +23,6 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="python" />
 
 </div>
-
-
-> ### 在 0.6.0-alpha.4 修复重定向的问题，使用 `pip install nonebot-plugin-bing-chat==0.6.0a4 -i https://pypi.org/simple` 来获取更新
-
 
 ## 📖 介绍
 
@@ -59,7 +54,6 @@ QQ群：366731501
 
     pip install nonebot-plugin-bing-chat --upgrade
 
-
 打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
 
     plugins = ["nonebot_plugin_bing_chat"]
@@ -67,10 +61,13 @@ QQ群：366731501
 </details>
 
 ## ⚙️ 配置
-<details>
-<summary> <b> 在 nonebot2 项目的`data/BingChat`文件中添加`cookies.json（必须） </b> </summary>
 
-- 在浏览器安装 `cookie-editor` 的插件 
+<details>
+<summary>
+  <b>在 nonebot2 项目的<code>data/BingChat</code>文件中添加<code>cookies.json</code>（必须） </b>
+</summary>
+
+- 在浏览器安装 `cookie-editor` 的插件
   - [Chrome/Edge](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)（需要魔法）
   - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/)
 - 打开[`www.bing.com/chat`](https://www.bing.com/chat)（需要魔法）
@@ -81,22 +78,26 @@ QQ群：366731501
   
 </details>
 
-
 <details>
-<summary> <b> 在 nonebot2 项目的`.env`文件中添加下表中的配置（都为可选项） </b> </summary>
+<summary>
+  <b> 在 nonebot2 项目的<code>.env</code>文件中添加下表中的配置（都为可选项） </b>
+</summary>
 
 <b> 对默认的命令进行修改 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
-|:-----:|:-----:|:----:|:----:|
+|:----:|:----:|:----:|:----:|
+| bingchat_command_start | str/list[str] | 与command_start相同 | 命令前缀 |
 | bingchat_command_chat | str/list[str] | ["chat"] | 对话命令 |
 | bingchat_command_new_chat | str/list[str] | ["chat-new", "刷新对话"] | 新建对话命令 |
 | bingchat_command_history_chat | str/list[str] | ["chat-history"] | 返回历史对话命令 |
+| bingchat_block | bool | False | 是否block |
+| bingchat_priority | int | 1 | 指令的优先级 |
 | bingchat_command_to_me | bool | False | 所有命令是否需要@bot |
 | bingchat_share_chat | bool | False | 他人是否可以用过回复bot而进行对话 |
   
  <b> 对行为进行配置 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
-|:-----:|:-----:|:----:|:----:|
+|:----:|:----:|:----:|:----:|
 | bingchat_conversation_style | Literal['creative', 'balanced', 'precise'] | "balanced" | 对话样式 |
 | bingchat_show_is_waiting | bool | False | 是否显示“正在请求” |
 | bingchat_auto_refresh_conversation | bool | True | 到达命令上线后是否自动刷新 |
@@ -104,15 +105,19 @@ QQ群：366731501
 
 <b> 对特定群聊进行屏蔽 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
-|:-----:|:-----:|:----:|:----:|
+|:----:|:----:|:----:|:----:|
 | bingchat_group_filter_mode | "whitelist"/"blacklist" | "blacklist" | 对群聊屏蔽的模式 |
 | bingchat_group_filter_blacklist | list[int] | [] | 黑名单列表 |
 | bingchat_group_filter_whitelist | list[int] | [] | 白名单列表 |
   
+源码内容可以在[./nonebot_plugin_bing_chat/common/dataModel.py](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/blob/main/nonebot_plugin_bing_chat/common/dataModel.py)查看
+
 </details>
 
 ## 🎉 使用
+
 ### 指令表
+
 以下为指令可以在配置文件中更改
 | 指令 | 权限 | 需要@ | 范围 | 说明 |
 |:-----:|:----:|:----:|:----:|:----:|
@@ -126,11 +131,7 @@ QQ群：366731501
   
   准备添加的功能请查看[issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues)
   
-  如果你有更多需求，请[发布新的issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues/new)让我知道
-
-
-
-  
 ## 🌸 致谢
+
 - [@A-kirami](https://github.com/A-kirami)  项目使用了README[模板](https://github.com/A-kirami/nonebot-plugin-template)
 - [@acheong08](https://github.com/acheong08)  项目使用了与Bing通讯的接口 [EdgeGPT](https://github.com/acheong08/EdgeGPT)
