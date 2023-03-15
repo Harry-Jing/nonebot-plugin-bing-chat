@@ -83,10 +83,12 @@ QQ群：366731501
   <b> 在 nonebot2 项目的<code>.env</code>文件中添加下表中的配置（都为可选项） </b>
 </summary>
 
+</br> 在.env书写配置时，字符转要使用**双引号**，而**不是**单引号 </br>
+
 <b> 对默认的命令进行修改 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
 |:----:|:----:|:----:|:----:|
-| bingchat_command_start | str/list[str] | 与command_start相同 | 命令前缀 |
+| command_start | list[str] | ["/"] | 命令前缀 |
 | bingchat_command_chat | str/list[str] | ["chat"] | 对话命令 |
 | bingchat_command_new_chat | str/list[str] | ["chat-new", "刷新对话"] | 新建对话命令 |
 | bingchat_command_history_chat | str/list[str] | ["chat-history"] | 返回历史对话命令 |
