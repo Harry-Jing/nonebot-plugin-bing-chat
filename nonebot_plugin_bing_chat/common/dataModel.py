@@ -37,7 +37,7 @@ class Config(BaseModel, extra=Extra.ignore):
     bingchat_command_new_chat: set[str] = {'chat-new', '刷新对话'}
     bingchat_command_history_chat: set[str] = {'chat-history'}
 
-    bingchat_log: bool = False
+    bingchat_log: bool = True
     bingchat_show_detail: bool = False
     bingchat_show_is_waiting: bool = True
     bingchat_plugin_directory: Path = Path('./data/BingChat')
