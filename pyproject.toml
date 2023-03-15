@@ -1,7 +1,7 @@
 [project]
 name = "nonebot-plugin-bing-chat"
 description = "基于nonebot2的bing-chat软件"
-version = "0.6.1"
+version = "0.6.2"
 authors = [
     {name = "Harry", email = "Harry0259@163.com"},
 ]
@@ -13,7 +13,7 @@ dependencies = [
     "nonebot2>=2.0.0b4",
     "nonebot-adapter-onebot>=2.2.0",
     "nonebot_plugin_apscheduler",
-    "EdgeGPT>=0.0.56.1",
+    "EdgeGPT>=0.0.56.2",
 ]
 classifiers=[
         "Framework :: Pydantic",
