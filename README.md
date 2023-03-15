@@ -101,7 +101,7 @@ QQ群：366731501
 | bingchat_conversation_style | Literal['creative', 'balanced', 'precise'] | "balanced" | 对话样式 |
 | bingchat_show_is_waiting | bool | False | 是否显示“正在请求” |
 | bingchat_auto_refresh_conversation | bool | True | 到达命令上线后是否自动刷新 |
-| bingchat_log | bool | False | 是否记录日志 |
+| bingchat_log | bool | True | 是否记录日志 |
 
 <b> 对特定群聊进行屏蔽 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
