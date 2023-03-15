@@ -27,11 +27,11 @@ from ..common.utils import (
     command_chat,
     command_new_chat,
     command_history_chat,
-    matcher_reply_to_me,
+    HELP_MESSAGE,
     createLog,
-    helpMessage,
 )
 from ..common.dataModel import (
+    DisplayMode,
     Conversation,
     BingChatResponse,
 )
@@ -44,7 +44,8 @@ from .utils import (
     matcher_reply_to_continue_chat,
     UserData,
 )
-
+if plugin_config.bingchat_display_mode in ('image_simple', 'image_detail'):
+    from nonebot_plugin_htmlrender import md_to_pic
 
 @command_chat.handle()
 async def bingchat_command_chat(
@@ -56,7 +57,7 @@ async def bingchat_command_chat(
 ):
     # 如果arg为空，则返回帮助信息
     if not arg:
-        await matcher.finish(helpMessage())
+        await matcher.finish(HELP_MESSAGE)
 
     # 检查用户和群组是否在名单中，如果没有则终止
     try:
@@ -135,19 +136,29 @@ async def bingchat_command_chat(
 
     # 发送响应值
     try:
-        if plugin_config.bingchat_show_detail:
-            data = await matcher.send(
-                replyOut(
-                    event.message_id,
-                    current_user_data.history[-1].reply.content_with_reference,
+        match plugin_config.bingchat_display_mode:
+            case 'text_simple' | 'text_detail':
+                data = await matcher.send(
+                    replyOut(
+                        event.message_id,
+                        current_user_data.history[-1].reply.get_content(
+                            plugin_config.bingchat_display_mode
+                        ),
+                    )
                 )
-            )
-        else:
-            data = await matcher.send(
-                replyOut(
-                    event.message_id, current_user_data.history[-1].reply.content_simple
+            case 'image_simple' | 'image_detail':
+                img = await md_to_pic(
+                    current_user_data.history[-1].reply.get_content(
+                        plugin_config.bingchat_display_mode
+                    )
                 )
-            )
+                data = await matcher.send(
+                    replyOut(
+                        event.message_id,
+                        MessageSegment.image(img),
+                    )
+                )
+
         reply_message_id_dict[data['message_id']] = current_user_data.sender.user_id
     except BingChatResponseException as exc:
         await matcher.finish(

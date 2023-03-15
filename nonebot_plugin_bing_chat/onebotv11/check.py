@@ -6,7 +6,6 @@ from nonebot.adapters.onebot.v11 import (
 )
 
 from ..common.utils import plugin_config
-from ..common.dataModel import filterMode
 from ..common.exceptions import (
     BingChatPermissionDeniedException,
     BingchatIsWaitingForResponseException,
@@ -24,11 +23,11 @@ def CheckIfInList(event: MessageEvent) -> str:
 
     if isinstance(event, GroupMessageEvent):
         match plugin_config.bingchat_group_filter_mode:
-            case filterMode.blacklist:
+            case 'blacklist':
                 if event.group_id in plugin_config.bingchat_group_filter_blacklist:
                     raise BingChatPermissionDeniedException('您没有权限，此群组在黑名单')
 
-            case filterMode.whitelist:
+            case 'whitelist':
                 if event.group_id not in plugin_config.bingchat_group_filter_whitelist:
                     raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单')
 

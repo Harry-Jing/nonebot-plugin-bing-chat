@@ -7,8 +7,6 @@ from nonebot.log import logger
 from nonebot.rule import Rule, command, to_me
 from nonebot.plugin.on import on_message
 
-require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
 
 from .dataModel import Config
 
@@ -45,19 +43,14 @@ matcher_reply_to_me = on_message(
 
 _matcher_in_regex = '|'.join(
     (
-        f"""(({'|'.join(plugin_config.bingchat_command_start)})({'|'.join(plugin_config.bingchat_command_chat)}).*)""",
-        f"""(({'|'.join(plugin_config.bingchat_command_start)})({'|'.join(plugin_config.bingchat_command_new_chat)}).*)""",
-        f"""(({'|'.join(plugin_config.bingchat_command_start)})({'|'.join(plugin_config.bingchat_command_history_chat)}).*)""",
+        f"""(({'|'.join(plugin_config.command_start)})({'|'.join(plugin_config.bingchat_command_chat)}).*)""",
+        f"""(({'|'.join(plugin_config.command_start)})({'|'.join(plugin_config.bingchat_command_new_chat)}).*)""",
+        f"""(({'|'.join(plugin_config.command_start)})({'|'.join(plugin_config.bingchat_command_history_chat)}).*)""",
     )
 )
 
-
-def isConfilctWithOtherMatcher(msg: str) -> bool:
-    return True if re.match(_matcher_in_regex, msg) else False
-
-
-def helpMessage() -> str:
-    help_message = (
+HELP_MESSAGE = (
+    (
         f"""开始对话：{'/'.join(i for i in plugin_config.bingchat_command_chat)} + {{你要询问的内容}}"""
         f"""\n\n"""
         f"""新建一个对话：{'/'.join(i for i in plugin_config.bingchat_command_new_chat)}"""
@@ -66,32 +59,50 @@ def helpMessage() -> str:
         f"""\n\n"""
         f"""如果有任何疑问请查看https://github.com/Harry-Jing/nonebot-plugin-bing-chat"""
     )
+    if '' in plugin_config.command_start
+    else (
+        f"""以下所有的命令都要在开头加上命令符号！！！"""
+        f"""\n\n"""
+        f"""命令符号：{','.join(f'"{i}"' for i in plugin_config.command_start)}"""
+        f"""\n\n"""
+        f"""开始对话：{'/'.join(i for i in plugin_config.bingchat_command_chat)} + {{你要询问的内容}}"""
+        f"""\n\n"""
+        f"""新建一个对话：{'/'.join(i for i in plugin_config.bingchat_command_new_chat)}"""
+        f"""\n\n"""
+        f"""查看历史记录：{'/'.join(i for i in plugin_config.bingchat_command_history_chat)}"""
+        f"""\n\n"""
+        f"""如果有任何疑问请查看https://github.com/Harry-Jing/nonebot-plugin-bing-chat"""
+    )
+)
 
-    if '' not in plugin_config.bingchat_command_start:
-        help_message = (
-            f"""以下所有的命令都要在开头加上命令符号！！！"""
-            f"""\n\n"""
-            f"""命令符号：{','.join(f'"{i}"' for i in plugin_config.bingchat_command_start)}"""
-            f"""\n\n"""
-        ) + help_message
 
-    return help_message
+"""初始化"""
+plugin_directory.mkdir(parents=True, exist_ok=True)
+# 检查cookie文件是否存在且不为空
+plugin_cookies_path = plugin_directory.joinpath('cookies.json')
+plugin_cookies_path.touch(exist_ok=True)
+if plugin_cookies_path.stat().st_size == 0:
+    raise FileNotFoundError(
+        'BingChat插件未配置cookie，请在./data/BingChat/cookies.json中填入你的cookie'
+    )
+# 创建log文件夹
+plugin_log_directory = plugin_directory / 'log'
+plugin_log_directory.mkdir(parents=True, exist_ok=True)
 
 
-def initFile() -> None:
-    plugin_directory.mkdir(parents=True, exist_ok=True)
+if plugin_config.bingchat_display_mode in ('image_simple', 'image_detail'):
+    try:
+        require("nonebot_plugin_htmlrender")
+    except RuntimeError as exc:
+        raise RuntimeError(
+            "请使用 pip install nonebot-plugin-bing-chat[all] 来安装所有依赖"
+        ) from exc
+require("nonebot_plugin_apscheduler")
+from nonebot_plugin_apscheduler import scheduler
 
-    # 检查cookie文件是否存在且不为空
-    file_path = plugin_directory.joinpath('cookies.json')
-    file_path.touch(exist_ok=True)
-    if file_path.stat().st_size == 0:
-        raise FileNotFoundError(
-            'BingChat插件未配置cookie，请在./data/BingChat/cookies.json中填入你的cookie'
-        )
 
-    # 创建log文件夹
-    plugin_log_directory = plugin_directory / 'log'
-    plugin_log_directory.mkdir(parents=True, exist_ok=True)
+def isConfilctWithOtherMatcher(msg: str) -> bool:
+    return True if re.match(_matcher_in_regex, msg) else False
 
 
 def createLog(data: str) -> None:

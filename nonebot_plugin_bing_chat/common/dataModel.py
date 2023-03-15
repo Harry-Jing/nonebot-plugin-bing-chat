@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Optional, Literal
+from typing import Optional, Literal, TypeAlias
 from pathlib import Path
 
 from pydantic import BaseModel, Extra, validator
@@ -19,38 +19,41 @@ def removeQuoteStr(string: str) -> str:
     return re.sub(r'\[\^\d+?\^\]', '', string)
 
 
-class filterMode(str, Enum):
-    whitelist = 'whitelist'
-    blacklist = 'blacklist'
+FilterMode: TypeAlias = Literal['whitelist', 'blacklist']
+DisplayMode: TypeAlias = Literal[
+    'text_simple', 'text_detail', 'image_simple', 'image_detail'
+]
+ConversationStyle: TypeAlias = Literal['creative', 'balanced', 'precise']
 
 
 class Config(BaseModel, extra=Extra.ignore):
     superusers: set[int]
+    command_start: set[str]
 
     bingchat_block: bool = False
     bingchat_to_me: bool = False
     bingchat_priority: int = 1
     bingchat_share_chat: bool = False
-    bingchat_command_start: set[str]  # 默认值为command_start
 
     bingchat_command_chat: set[str] = {'chat'}
     bingchat_command_new_chat: set[str] = {'chat-new', '刷新对话'}
     bingchat_command_history_chat: set[str] = {'chat-history'}
 
     bingchat_log: bool = True
-    bingchat_show_detail: bool = False
+    bingchat_display_mode: DisplayMode = 'text_simple'
     bingchat_show_is_waiting: bool = True
     bingchat_plugin_directory: Path = Path('./data/BingChat')
-    bingchat_conversation_style: Literal['creative', 'balanced', 'precise'] = 'balanced'
+    bingchat_conversation_style: ConversationStyle = 'balanced'
     bingchat_auto_refresh_conversation: bool = True
 
-    bingchat_group_filter_mode: filterMode = filterMode.blacklist
+    bingchat_group_filter_mode: FilterMode = 'blacklist'
     bingchat_group_filter_blacklist: set[Optional[int]] = set()
     bingchat_group_filter_whitelist: set[Optional[int]] = set()
 
     def __init__(self, **data) -> None:
-        if not 'bingchat_command_start' in data:
-            data['bingchat_command_start'] = data['command_start']
+        if 'bingchat_show_detail' in data:
+            logger.warning('<bingchat_show_detail已弃用，请使用bingchat_display_mode>')
+            data['bingchat_display_mode'] = DisplayMode.text_detail
         super().__init__(**data)
 
     @validator('bingchat_command_chat', pre=True)
@@ -125,6 +128,13 @@ class BingChatResponse(BaseModel):
                 logger.error('<未知的错误>')
                 raise BingChatResponseException('<未知的错误, 请管理员查看控制台>')
 
+    def get_content(self, display_mode: DisplayMode) -> str:
+        match display_mode:
+            case 'text_simple' | 'image_simple':
+                return self.content_simple
+            case 'text_detail' | 'image_detail':
+                return self.content_with_reference
+
     @property
     def content_simple(self) -> str:
         try:
@@ -136,9 +146,7 @@ class BingChatResponse(BaseModel):
     @property
     def content_with_reference(self) -> str:
         try:
-            return removeQuoteStr(
-                self.raw["item"]["messages"][1]["adaptiveCards"][0]['body'][0]['text']
-            )
+            return removeQuoteStr(self.adaptive_cards[0]['text'])
         except (IndexError, KeyError) as exc:
             logger.error(self.raw)
             raise BingChatResponseException('<无效的响应值, 请管理员查看控制台>') from exc

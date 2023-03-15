@@ -1,5 +1,5 @@
 import time
-from typing import Any, Optional
+from typing import Any, Optional, Iterable
 
 from EdgeGPT import Chatbot
 from pydantic import BaseModel
