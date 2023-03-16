@@ -64,7 +64,7 @@ QQ群：366731501
 
 <details>
 <summary>
-  <b>在 nonebot2 项目的<code>data/BingChat</code>文件中添加<code>cookies.json</code>（必须） </b>
+  <b>在 nonebot2 项目的<code./>data/BingChat</code>文件夹中添加<code>cookies.json</code>（必须） </b>
 </summary>
 
 - 在浏览器安装 `cookie-editor` 的插件
