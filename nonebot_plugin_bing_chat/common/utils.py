@@ -3,15 +3,13 @@ import shutil
 from datetime import datetime, timedelta
 
 from nonebot import get_driver, require
-from nonebot.log import logger
-from nonebot.rule import Rule, command, to_me
 from nonebot.plugin.on import on_message
+from nonebot.rule import Rule, command, to_me
 
 require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 from .dataModel import Config
-
 
 plugin_config = Config.parse_obj(get_driver().config)
 
@@ -58,11 +56,11 @@ def isConfilctWithOtherMatcher(msg: str) -> bool:
 
 def helpMessage() -> str:
     help_message = (
-        f"""开始对话：{'/'.join(i for i in plugin_config.bingchat_command_chat)} + {{你要询问的内容}}"""
+        f"""开始对话：{'/'.join(plugin_config.bingchat_command_chat)} + {{你要询问的内容}}"""
         f"""\n\n"""
-        f"""新建一个对话：{'/'.join(i for i in plugin_config.bingchat_command_new_chat)}"""
+        f"""新建一个对话：{'/'.join(plugin_config.bingchat_command_new_chat)}"""
         f"""\n\n"""
-        f"""查看历史记录：{'/'.join(i for i in plugin_config.bingchat_command_history_chat)}"""
+        f"""查看历史记录：{'/'.join(plugin_config.bingchat_command_history_chat)}"""
         f"""\n\n"""
         f"""如果有任何疑问请查看https://github.com/Harry-Jing/nonebot-plugin-bing-chat"""
     )
@@ -71,7 +69,7 @@ def helpMessage() -> str:
         help_message = (
             f"""以下所有的命令都要在开头加上命令符号！！！"""
             f"""\n\n"""
-            f"""命令符号：{','.join(f'"{i}"' for i in plugin_config.bingchat_command_start)}"""
+            f"""命令符号：{','.join(plugin_config.bingchat_command_start)}"""
             f"""\n\n"""
         ) + help_message
 
@@ -105,7 +103,7 @@ def createLog(data: str) -> None:
     current_log_file.write_text(data=str(data), encoding='utf-8')
 
 
-@scheduler.scheduled_job('cron', hour=2)
+@scheduler.scheduled_job('cron', hour=2)  # type: ignore
 async def _del_log_file() -> None:
     print('del_log_file')
     current_time = datetime.now()

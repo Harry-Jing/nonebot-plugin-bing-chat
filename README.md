@@ -20,7 +20,7 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
   <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/nonebot-plugin-bing-chat">
 </a>
 
-<img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="python" />
+<img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python" />
 
 </div>
 

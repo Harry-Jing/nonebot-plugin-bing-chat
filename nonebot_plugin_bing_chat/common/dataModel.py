@@ -1,22 +1,39 @@
 import re
 from enum import Enum
-from typing import Optional, Literal
 from pathlib import Path
-
-from pydantic import BaseModel, Extra, validator
+from typing import Any, Dict, List, Literal, Optional, Set
 
 from nonebot.log import logger
+from pydantic import BaseModel, Extra, validator
 
 from .exceptions import (
-    BaseBingChatException,
-    BingChatResponseException,
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
+    BingChatResponseException,
 )
+
+INVALID_RESPONSE_MESSAGE = '<无效的响应值, 请管理员查看控制台>'
 
 
 def removeQuoteStr(string: str) -> str:
-    return re.sub(r'\[\^\d+?\^\]', '', string)
+    return re.sub(r'\[\^\d+?\^]', '', string)
+
+
+def deep_get(dictionary: Dict[str, Any], keys: str) -> Any:
+    for key in keys.split("."):
+        if list_search := re.search(r"(\S+)?\[(\d+)]", key):
+            try:
+                if list_search[1]:
+                    dictionary = dictionary[list_search[1]]
+                dictionary = dictionary[int(list_search[2])]  # type: ignore
+            except (KeyError, IndexError):
+                return None
+        else:
+            try:
+                dictionary = dictionary[key]
+            except (KeyError, TypeError):
+                return None
+    return dictionary
 
 
 class filterMode(str, Enum):
@@ -25,17 +42,17 @@ class filterMode(str, Enum):
 
 
 class Config(BaseModel, extra=Extra.ignore):
-    superusers: set[int]
+    superusers: Set[int]
 
     bingchat_block: bool = False
     bingchat_to_me: bool = False
     bingchat_priority: int = 1
     bingchat_share_chat: bool = False
-    bingchat_command_start: set[str]  # 默认值为command_start
+    bingchat_command_start: Set[str]  # 默认值为command_start
 
-    bingchat_command_chat: set[str] = {'chat'}
-    bingchat_command_new_chat: set[str] = {'chat-new', '刷新对话'}
-    bingchat_command_history_chat: set[str] = {'chat-history'}
+    bingchat_command_chat: Set[str] = {'chat'}
+    bingchat_command_new_chat: Set[str] = {'chat-new', '刷新对话'}
+    bingchat_command_history_chat: Set[str] = {'chat-history'}
 
     bingchat_log: bool = True
     bingchat_show_detail: bool = False
@@ -45,115 +62,99 @@ class Config(BaseModel, extra=Extra.ignore):
     bingchat_auto_refresh_conversation: bool = True
 
     bingchat_group_filter_mode: filterMode = filterMode.blacklist
-    bingchat_group_filter_blacklist: set[Optional[int]] = set()
-    bingchat_group_filter_whitelist: set[Optional[int]] = set()
+    bingchat_group_filter_blacklist: Set[Optional[int]] = set()
+    bingchat_group_filter_whitelist: Set[Optional[int]] = set()
 
-    def __init__(self, **data) -> None:
-        if not 'bingchat_command_start' in data:
+    def __init__(self, **data: Any) -> None:
+        if 'bingchat_command_start' not in data:
             data['bingchat_command_start'] = data['command_start']
         super().__init__(**data)
 
     @validator('bingchat_command_chat', pre=True)
-    def bingchat_command_chat_validator(cls, v) -> set:
+    def bingchat_command_chat_validator(cls, v) -> set:  # type: ignore
         if not v:
             raise ValueError('bingchat_command_chat不能为空')
         return set(v)
 
     @validator('bingchat_command_new_chat', pre=True)
-    def bingchat_command_new_chat_validator(cls, v) -> set:
+    def bingchat_command_new_chat_validator(cls, v) -> set:  # type: ignore
         if not v:
             raise ValueError('bingchat_command_new_chat不能为空')
         return set(v)
 
     @validator('bingchat_command_history_chat', pre=True)
-    def bingchat_command_history_chat_validator(cls, v) -> set:
+    def bingchat_command_history_chat_validator(cls, v) -> set:  # type: ignore
         if not v:
             raise ValueError('bingchat_command_history_chat不能为空')
         return set(v)
 
     @validator('bingchat_plugin_directory', pre=True)
-    def bingchat_plugin_directory_validator(cls, v) -> Path:
+    def bingchat_plugin_directory_validator(cls, v) -> Path:  # type: ignore
         return Path(v)
 
 
 class BingChatResponse(BaseModel):
-    raw: dict
+    raw: Dict[str, Any]
 
     @validator('raw')
-    def rawValidator(cls, v):
-        match v:
-            case {'item': {'result': {'value': 'Throttled'}}}:
-                logger.error('<Bing账号到达今日请求上限>')
-                raise BingChatAccountReachLimitException('<Bing账号到达今日请求上限>')
+    def rawValidator(cls, v):  # type: ignore
+        result_value = deep_get(v, 'item.result.value')
 
-            case {
-                'item': {
-                    'result': {'value': 'Success'},
-                    'throttling': {
-                        'numUserMessagesInConversation': num_conver,
-                        'maxNumUserMessagesInConversation': max_conver,
-                    },
-                }
-            } if num_conver > max_conver:
+        if result_value == 'Throttled':
+            logger.error('<Bing账号到达今日请求上限>')
+            raise BingChatAccountReachLimitException('<Bing账号到达今日请求上限>')
+
+        if result_value == 'Success':
+            num_conver = deep_get(v, 'item.throttling.numUserMessagesInConversation')
+            max_conver = deep_get(v, 'item.throttling.maxNumUserMessagesInConversation')
+
+            if num_conver is not None and max_conver is not None and num_conver > max_conver:
                 raise BingChatConversationReachLimitException(
                     f'<达到对话上限>\n最大对话次数：{max_conver}\n你的话次数：{num_conver}'
                 )
 
-            case {
-                'item': {
-                    'result': {'value': 'Success'},
-                    'messages': [
-                        _,
-                        {'hiddenText': hiddenText},
-                    ],
-                }
-            }:
-                raise BingChatResponseException(f'<Bing检测到敏感问题，无法回答>\n{hiddenText}')
+            hidden_text = deep_get(v, 'item.messages[1].hiddenText')
+            if hidden_text is not None:
+                raise BingChatResponseException(f'<Bing检测到敏感问题，无法回答>\n{hidden_text}')
 
-            case {
-                'item': {
-                    'result': {'value': 'Success'},
-                    'messages': [
-                        _,
-                        {'text': text},
-                    ],
-                }
-            }:
+            text = deep_get(v, 'item.messages[1].text')
+            if text is not None:
                 return v
 
-            case _:
-                logger.error('<未知的错误>')
-                raise BingChatResponseException('<未知的错误, 请管理员查看控制台>')
+        logger.error('<未知的错误>')
+        raise BingChatResponseException('<未知的错误, 请管理员查看控制台>')
+
 
     @property
     def content_simple(self) -> str:
-        try:
-            return removeQuoteStr(self.raw["item"]["messages"][1]["text"])
-        except (IndexError, KeyError) as exc:
+        text = deep_get(self.raw, "item.messages[1].text")
+        if text is not None:
+            return removeQuoteStr(text)
+        else:
             logger.error(self.raw)
-            raise BingChatResponseException('<无效的响应值, 请管理员查看控制台>') from exc
+            raise BingChatResponseException(INVALID_RESPONSE_MESSAGE)
 
     @property
     def content_with_reference(self) -> str:
-        try:
-            return removeQuoteStr(
-                self.raw["item"]["messages"][1]["adaptiveCards"][0]['body'][0]['text']
-            )
-        except (IndexError, KeyError) as exc:
+        text = deep_get(self.raw, "item.messages[1].adaptiveCards[0].body[0].text")
+        if text is not None:
+            return removeQuoteStr(text)
+        else:
             logger.error(self.raw)
-            raise BingChatResponseException('<无效的响应值, 请管理员查看控制台>') from exc
+            raise BingChatResponseException(INVALID_RESPONSE_MESSAGE)
 
     @property
     def content_detail(self) -> str:
         return ''
 
     @property
-    def adaptive_cards(self) -> list:
-        try:
-            return self.raw["item"]["messages"][1]["adaptiveCards"][0]['body']
-        except (IndexError, KeyError) as exc:
+    def adaptive_cards(self) -> List[Any]:
+        cards: Optional[List[Any]] = deep_get(self.raw, "item.messages[1].adaptiveCards[0].body")
+        if cards is not None:
+            return cards
+        else:
             logger.error(self.raw)
-            raise BingChatResponseException('<无效的响应值, 请管理员查看控制台>') from exc
+            raise BingChatResponseException(INVALID_RESPONSE_MESSAGE)
 
 
 class Conversation(BaseModel):

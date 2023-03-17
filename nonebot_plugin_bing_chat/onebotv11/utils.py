@@ -1,21 +1,19 @@
 import time
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from EdgeGPT import Chatbot
-from pydantic import BaseModel
-
 from nonebot import Bot
-from nonebot.log import logger
-from nonebot.rule import Rule, to_me
+from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11.event import Sender
 from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message
-from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
-from nonebot.adapters.onebot.v11.event import Sender
+from nonebot.rule import Rule
+from pydantic import BaseModel
 
 from ..common.dataModel import Conversation
 from ..common.utils import (
-    plugin_config,
     isConfilctWithOtherMatcher,
+    plugin_config,
 )
 
 
@@ -29,31 +27,31 @@ class UserData(BaseModel):
     last_time: float = time.time()
     is_waiting: bool = False
     conversation_count: int = 0
-    history: list[Conversation] = []
+    history: List[Conversation] = []
 
     class Config:
         arbitrary_types_allowed = True
 
 
-def replyOut(message_id: int, message_segment: MessageSegment | str) -> Message:
+def replyOut(message_id: int, message_segment: Union[MessageSegment, str]) -> Message:
     """返回一个回复消息"""
     return MessageSegment.reply(message_id) + message_segment
 
 
-def historyOut(bot: Bot, user_data: UserData) -> list[MessageSegment]:
+def historyOut(bot: Bot, user_data: UserData) -> List[MessageSegment]:
     """将历史记录输出到消息列表并返回"""
     nodes = []
     for conversation in user_data.history:
         nodes.append(
             MessageSegment.node_custom(
-                user_id=user_data.sender.user_id,
-                nickname=user_data.sender.nickname,
+                user_id=user_data.sender.user_id,  # type: ignore
+                nickname=user_data.sender.nickname,  # type: ignore
                 content=conversation.ask,
             )
         )
         nodes.append(
             MessageSegment.node_custom(
-                user_id=bot.self_id,
+                user_id=int(bot.self_id),
                 nickname='Bing',
                 content=conversation.reply.content_simple,
             )
@@ -61,16 +59,17 @@ def historyOut(bot: Bot, user_data: UserData) -> list[MessageSegment]:
     return nodes
 
 
-def detailOut(bot: Bot, raw: dict) -> list[MessageSegment]:
-    nodes = []
+# TODO: ?
+def detailOut(bot: Bot, raw: Dict[str, Any]) -> List[MessageSegment]:
+    nodes: List[MessageSegment] = []
     return nodes
 
 
 # dict[user_id, UserData] user_id: UserData
-user_data_dict: dict[int, UserData] = dict()
+user_data_dict: Dict[int, UserData] = dict()
 
 # dict[message_id, user_id] bot回答的问题的message_id: 对应的用户的user_id
-reply_message_id_dict: dict[int, int] = dict()
+reply_message_id_dict: Dict[int, int] = dict()
 
 
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:

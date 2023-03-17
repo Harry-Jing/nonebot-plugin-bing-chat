@@ -7,9 +7,8 @@ authors = [
 ]
 readme = "README.md"
 license = {text = "GPL-3"}
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 dependencies = [
-    "httpx",
     "nonebot2>=2.0.0b4",
     "nonebot-adapter-onebot>=2.2.0",
     "nonebot_plugin_apscheduler",
@@ -23,6 +22,8 @@ classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Natural Language :: Chinese (Simplified)",
