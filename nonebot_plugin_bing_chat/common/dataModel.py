@@ -15,13 +15,13 @@ from .exceptions import (
 INVALID_RESPONSE_MESSAGE = '<无效的响应值, 请管理员查看控制台>'
 
 
-def removeQuoteStr(string: str) -> str:
+def remove_quote_str(string: str) -> str:
     return re.sub(r'\[\^\d+?\^]', '', string)
 
 
 def deep_get(dictionary: Dict[str, Any], keys: str) -> Any:
-    for key in keys.split("."):
-        if list_search := re.search(r"(\S+)?\[(\d+)]", key):
+    for key in keys.split('.'):
+        if list_search := re.search(r'(\S+)?\[(\d+)]', key):
             try:
                 if list_search[1]:
                     dictionary = dictionary[list_search[1]]
@@ -36,7 +36,7 @@ def deep_get(dictionary: Dict[str, Any], keys: str) -> Any:
     return dictionary
 
 
-class filterMode(str, Enum):
+class FilterMode(str, Enum):
     whitelist = 'whitelist'
     blacklist = 'blacklist'
 
@@ -61,7 +61,7 @@ class Config(BaseModel, extra=Extra.ignore):
     bingchat_conversation_style: Literal['creative', 'balanced', 'precise'] = 'balanced'
     bingchat_auto_refresh_conversation: bool = True
 
-    bingchat_group_filter_mode: filterMode = filterMode.blacklist
+    bingchat_group_filter_mode: FilterMode = FilterMode.blacklist
     bingchat_group_filter_blacklist: Set[Optional[int]] = set()
     bingchat_group_filter_whitelist: Set[Optional[int]] = set()
 
@@ -97,7 +97,7 @@ class BingChatResponse(BaseModel):
     raw: Dict[str, Any]
 
     @validator('raw')
-    def rawValidator(cls, v):  # type: ignore
+    def raw_validator(cls, v):  # type: ignore
         result_value = deep_get(v, 'item.result.value')
 
         if result_value == 'Throttled':
@@ -108,7 +108,11 @@ class BingChatResponse(BaseModel):
             num_conver = deep_get(v, 'item.throttling.numUserMessagesInConversation')
             max_conver = deep_get(v, 'item.throttling.maxNumUserMessagesInConversation')
 
-            if num_conver is not None and max_conver is not None and num_conver > max_conver:
+            if (
+                num_conver is not None
+                and max_conver is not None
+                and num_conver > max_conver
+            ):
                 raise BingChatConversationReachLimitException(
                     f'<达到对话上限>\n最大对话次数：{max_conver}\n你的话次数：{num_conver}'
                 )
@@ -124,21 +128,20 @@ class BingChatResponse(BaseModel):
         logger.error('<未知的错误>')
         raise BingChatResponseException('<未知的错误, 请管理员查看控制台>')
 
-
     @property
     def content_simple(self) -> str:
-        text = deep_get(self.raw, "item.messages[1].text")
+        text = deep_get(self.raw, 'item.messages[1].text')
         if text is not None:
-            return removeQuoteStr(text)
+            return remove_quote_str(text)
         else:
             logger.error(self.raw)
             raise BingChatResponseException(INVALID_RESPONSE_MESSAGE)
 
     @property
     def content_with_reference(self) -> str:
-        text = deep_get(self.raw, "item.messages[1].adaptiveCards[0].body[0].text")
+        text = deep_get(self.raw, 'item.messages[1].adaptiveCards[0].body[0].text')
         if text is not None:
-            return removeQuoteStr(text)
+            return remove_quote_str(text)
         else:
             logger.error(self.raw)
             raise BingChatResponseException(INVALID_RESPONSE_MESSAGE)
@@ -149,7 +152,9 @@ class BingChatResponse(BaseModel):
 
     @property
     def adaptive_cards(self) -> List[Any]:
-        cards: Optional[List[Any]] = deep_get(self.raw, "item.messages[1].adaptiveCards[0].body")
+        cards: Optional[List[Any]] = deep_get(
+            self.raw, 'item.messages[1].adaptiveCards[0].body'
+        )
         if cards is not None:
             return cards
         else:

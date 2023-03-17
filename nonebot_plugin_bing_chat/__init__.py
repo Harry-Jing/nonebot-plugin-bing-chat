@@ -1,4 +1,4 @@
-from .common.utils import initFile
+from .common.utils import init_file
 from .onebotv11.main import Chatbot
 
-initFile()
+init_file()

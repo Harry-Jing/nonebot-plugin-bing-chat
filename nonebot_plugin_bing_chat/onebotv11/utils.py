@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from ..common.dataModel import Conversation
 from ..common.utils import (
-    isConfilctWithOtherMatcher,
+    is_conflict_with_other_matcher,
     plugin_config,
 )
 
@@ -33,12 +33,12 @@ class UserData(BaseModel):
         arbitrary_types_allowed = True
 
 
-def replyOut(message_id: int, message_segment: Union[MessageSegment, str]) -> Message:
+def reply_out(message_id: int, message_segment: Union[MessageSegment, str]) -> Message:
     """返回一个回复消息"""
     return MessageSegment.reply(message_id) + message_segment
 
 
-def historyOut(bot: Bot, user_data: UserData) -> List[MessageSegment]:
+def history_out(bot: Bot, user_data: UserData) -> List[MessageSegment]:
     """将历史记录输出到消息列表并返回"""
     nodes = []
     for conversation in user_data.history:
@@ -60,7 +60,7 @@ def historyOut(bot: Bot, user_data: UserData) -> List[MessageSegment]:
 
 
 # TODO: ?
-def detailOut(bot: Bot, raw: Dict[str, Any]) -> List[MessageSegment]:
+def detail_out(bot: Bot, raw: Dict[str, Any]) -> List[MessageSegment]:
     nodes: List[MessageSegment] = []
     return nodes
 
@@ -77,7 +77,7 @@ def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
         not to_me
         or not event.reply
         or event.reply.message_id not in reply_message_id_dict
-        or isConfilctWithOtherMatcher(event.message.extract_plain_text())
+        or is_conflict_with_other_matcher(event.message.extract_plain_text())
     ):
         return False
     return True

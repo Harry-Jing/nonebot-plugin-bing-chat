@@ -6,7 +6,7 @@ from nonebot import get_driver, require
 from nonebot.plugin.on import on_message
 from nonebot.rule import Rule, command, to_me
 
-require("nonebot_plugin_apscheduler")
+require('nonebot_plugin_apscheduler')
 from nonebot_plugin_apscheduler import scheduler
 
 from .dataModel import Config
@@ -50,11 +50,11 @@ _matcher_in_regex = '|'.join(
 )
 
 
-def isConfilctWithOtherMatcher(msg: str) -> bool:
+def is_conflict_with_other_matcher(msg: str) -> bool:
     return True if re.match(_matcher_in_regex, msg) else False
 
 
-def helpMessage() -> str:
+def get_help_message() -> str:
     help_message = (
         f"""开始对话：{'/'.join(plugin_config.bingchat_command_chat)} + {{你要询问的内容}}"""
         f"""\n\n"""
@@ -76,7 +76,7 @@ def helpMessage() -> str:
     return help_message
 
 
-def initFile() -> None:
+def init_file() -> None:
     plugin_directory.mkdir(parents=True, exist_ok=True)
 
     # 检查cookie文件是否存在且不为空
@@ -92,7 +92,7 @@ def initFile() -> None:
     plugin_log_directory.mkdir(parents=True, exist_ok=True)
 
 
-def createLog(data: str) -> None:
+def create_log(data: str) -> None:
     current_log_directory = (
         plugin_directory / 'log' / datetime.now().strftime('%Y-%m-%d')
     )
