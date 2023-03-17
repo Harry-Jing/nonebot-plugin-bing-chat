@@ -12,10 +12,7 @@ from nonebot.log import logger
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg, EventMessage
 
-from ..common.dataModel import (
-    BingChatResponse,
-    Conversation,
-)
+from ..common.data_model import BingChatResponse, Conversation
 from ..common.exceptions import (
     BaseBingChatException,
     BingChatAccountReachLimitException,

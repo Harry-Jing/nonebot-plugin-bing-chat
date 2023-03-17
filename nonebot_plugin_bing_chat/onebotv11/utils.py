@@ -10,7 +10,7 @@ from nonebot.plugin.on import on_message
 from nonebot.rule import Rule
 from pydantic import BaseModel
 
-from ..common.dataModel import Conversation
+from ..common.data_model import Conversation
 from ..common.utils import (
     is_conflict_with_other_matcher,
     plugin_config,

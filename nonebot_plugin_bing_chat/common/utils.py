@@ -9,7 +9,7 @@ from nonebot.rule import Rule, command, to_me
 require('nonebot_plugin_apscheduler')
 from nonebot_plugin_apscheduler import scheduler
 
-from .dataModel import Config
+from .data_model import Config
 
 plugin_config = Config.parse_obj(get_driver().config)
 

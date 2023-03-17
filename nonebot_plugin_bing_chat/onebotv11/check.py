@@ -3,7 +3,7 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
 )
 
-from ..common.dataModel import FilterMode
+from ..common.data_model import FilterMode
 from ..common.exceptions import (
     BingchatIsWaitingForResponseException,
     BingChatPermissionDeniedException,
