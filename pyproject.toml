@@ -9,10 +9,11 @@ readme = "README.md"
 license = {text = "GPL-3"}
 requires-python = ">=3.8"
 dependencies = [
-    "nonebot2>=2.0.0b4",
-    "nonebot-adapter-onebot>=2.2.0",
-    "nonebot_plugin_apscheduler",
-    "EdgeGPT>=0.0.59",
+    "EdgeGPT>=0.0.60",
+    "nonebot2>=2.0.0rc3",
+    "nonebot-adapter-onebot>=2.2.2",
+    "nonebot_plugin_apscheduler>=0.2.0",
+    "pydantic>=1.10.6",
 ]
 classifiers=[
         "Framework :: Pydantic",
