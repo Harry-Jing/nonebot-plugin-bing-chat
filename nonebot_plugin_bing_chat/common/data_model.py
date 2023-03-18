@@ -117,12 +117,10 @@ class BingChatResponse(BaseModel):
                     f'<达到对话上限>\n最大对话次数：{max_conver}\n你的话次数：{num_conver}'
                 )
 
-            hidden_text = deep_get(v, 'item.messages[1].hiddenText')
-            if hidden_text is not None:
+            if hidden_text := deep_get(v, 'item.messages[1].hiddenText'):
                 raise BingChatResponseException(f'<Bing检测到敏感问题，无法回答>\n{hidden_text}')
 
-            text = deep_get(v, 'item.messages[1].text')
-            if text is not None:
+            if _ := deep_get(v, 'item.messages[1].text'):
                 return v
 
         logger.error('<未知的错误>')
@@ -130,8 +128,7 @@ class BingChatResponse(BaseModel):
 
     @property
     def content_simple(self) -> str:
-        text = deep_get(self.raw, 'item.messages[1].text')
-        if text is not None:
+        if text := deep_get(self.raw, 'item.messages[1].text'):
             return remove_quote_str(text)
         else:
             logger.error(self.raw)
@@ -139,8 +136,7 @@ class BingChatResponse(BaseModel):
 
     @property
     def content_with_reference(self) -> str:
-        text = deep_get(self.raw, 'item.messages[1].adaptiveCards[0].body[0].text')
-        if text is not None:
+        if text := deep_get(self.raw, 'item.messages[1].adaptiveCards[0].body[0].text'):
             return remove_quote_str(text)
         else:
             logger.error(self.raw)
