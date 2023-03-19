@@ -11,7 +11,7 @@ from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
 
-from ..common.dataModel import (
+from ..common.data_model import (
     DisplayContentTypes,
     Conversation,
     UserData,
@@ -19,21 +19,21 @@ from ..common.dataModel import (
 from ..common.utils import (
     plugin_config,
     reply_message_id_dict,
-    isConfilctWithOtherMatcher,
+    is_confilct_with_other_matcher,
 )
 
 if plugin_config.bingchat_display_mode in ('image_simple', 'image_detail'):
     from nonebot_plugin_htmlrender import md_to_pic
 
 
-def replyOut(
+def reply_out(
     message_id: int, message_segment: MessageSegment | Message | str
 ) -> Message:
     """返回一个回复消息"""
     return MessageSegment.reply(message_id) + message_segment
 
 
-def historyOut(bot: Bot, user_data: UserData) -> Message:
+def history_out(bot: Bot, user_data: UserData) -> Message:
     """将历史记录输出到消息列表并返回"""
     msg = Message()
     for conversation in user_data.history:
@@ -51,7 +51,7 @@ def historyOut(bot: Bot, user_data: UserData) -> Message:
     return msg
 
 
-async def getDisplayContentSegment(
+async def get_display_content_segment(
     current_user_data: UserData, content_type: DisplayContentTypes
 ) -> Message:
     """获取应该响应的信息片段"""
@@ -75,7 +75,7 @@ async def getDisplayContentSegment(
     return msg
 
 
-async def getDisplayContent(current_user_data: UserData) -> list[Message]:
+async def get_display_content(current_user_data: UserData) -> list[Message]:
     """获取应该响应的信息"""
     message_segment_list:list[Message] = []
     for content_type in plugin_config.bingchat_display_content_types:
@@ -103,7 +103,7 @@ def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
         not to_me
         or not event.reply
         or event.reply.message_id not in reply_message_id_dict
-        or isConfilctWithOtherMatcher(event.message.extract_plain_text())
+        or is_confilct_with_other_matcher(event.message.extract_plain_text())
     ):
         return False
     return True

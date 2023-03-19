@@ -13,7 +13,7 @@ from ..common.exceptions import (
 from .utils import UserData
 
 
-def CheckIfInList(event: MessageEvent) -> str:
+def check_if_in_list(event: MessageEvent) -> str:
     """检查用户和群组是否在名单中，如果没有则抛出异常"""
     if event.sub_type == 'group':
         raise BingChatPermissionDeniedException('您没有权限，无法再群临时对话聊进行')
@@ -34,7 +34,7 @@ def CheckIfInList(event: MessageEvent) -> str:
     return '在名单中'
 
 
-def CheckIfUserIsWaitingForResponse(event: MessageEvent, user_data: UserData) -> str:
+def check_if_user_is_waiting_for_response(event: MessageEvent, user_data: UserData) -> str:
     """检查用户是否有对话在进行中，如果有则抛出异常"""
     if user_data.is_waiting:
         raise BingchatIsWaitingForResponseException('您有一个对话正在进行中，请先等待回应')

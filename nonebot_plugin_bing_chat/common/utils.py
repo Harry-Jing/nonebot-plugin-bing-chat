@@ -8,7 +8,7 @@ from nonebot.rule import Rule, command, to_me
 from nonebot.plugin.on import on_message
 
 
-from .dataModel import Config, UserInfo, UserData
+from .data_model import Config, UserInfo, UserData
 
 
 plugin_config = Config.parse_obj(get_driver().config)
@@ -108,11 +108,11 @@ require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 
-def isConfilctWithOtherMatcher(msg: str) -> bool:
+def is_confilct_with_other_matcher(msg: str) -> bool:
     return True if re.match(_matcher_in_regex, msg) else False
 
 
-def createLog(data: str) -> None:
+def create_log(data: str) -> None:
     current_log_directory = (
         plugin_directory / 'log' / datetime.now().strftime('%Y-%m-%d')
     )
