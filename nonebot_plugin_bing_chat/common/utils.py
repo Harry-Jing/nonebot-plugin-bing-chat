@@ -8,7 +8,7 @@ from nonebot.rule import Rule, command, to_me
 from nonebot.plugin.on import on_message
 
 
-from .dataModel import Config
+from .dataModel import Config, UserInfo, UserData
 
 
 plugin_config = Config.parse_obj(get_driver().config)
@@ -39,6 +39,13 @@ matcher_reply_to_me = on_message(
     priority=plugin_config.bingchat_priority,
     block=plugin_config.bingchat_block,
 )
+
+
+# dict[user_id, UserData] user_id: UserData
+user_data_dict: dict[UserInfo, UserData] = dict()
+
+# dict[message_id, user_id] bot回答的问题的message_id: 对应的用户的user_id
+reply_message_id_dict: dict[int, UserInfo] = dict()
 
 
 _matcher_in_regex = '|'.join(

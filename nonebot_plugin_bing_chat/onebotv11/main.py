@@ -22,30 +22,32 @@ from ..common.exceptions import (
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
 )
+from ..common.dataModel import (
+    DisplayContentTypes,
+    Sender,
+    UserInfo,
+    UserData,
+    Conversation,
+    BingChatResponse,
+)
 from ..common.utils import (
     plugin_config,
     command_chat,
     command_new_chat,
     command_history_chat,
+    user_data_dict,
+    reply_message_id_dict,
     HELP_MESSAGE,
     createLog,
 )
-from ..common.dataModel import (
-    DisplayMode,
-    Conversation,
-    BingChatResponse,
-)
 from .check import CheckIfInList, CheckIfUserIsWaitingForResponse
 from .utils import (
-    user_data_dict,
-    reply_message_id_dict,
     replyOut,
     historyOut,
+    getDisplayContent,
     matcher_reply_to_continue_chat,
-    UserData,
 )
-if plugin_config.bingchat_display_mode in ('image_simple', 'image_detail'):
-    from nonebot_plugin_htmlrender import md_to_pic
+
 
 @command_chat.handle()
 async def bingchat_command_chat(
@@ -69,7 +71,7 @@ async def bingchat_command_chat(
         current_user_data = user_data
     else:
         current_user_data = user_data_dict.setdefault(
-            event.sender.user_id, UserData(sender=event.sender)
+            UserInfo(platorm='qq', user_id=event.user_id), UserData(sender=Sender.parse_obj(event.sender.dict()))
         )
 
     if not current_user_data.first_ask_message_id:
@@ -95,7 +97,7 @@ async def bingchat_command_chat(
 
     # 向Bing发送请求, 并获取响应值
     try:
-        if plugin_config.bingchat_show_is_waiting:
+        if plugin_config.bingchat_display_is_waiting:
             message_is_asking = await matcher.send(replyOut(event.message_id, '正在请求'))
         current_user_data.is_waiting = True
         user_input_text = arg.extract_plain_text()
@@ -111,7 +113,7 @@ async def bingchat_command_chat(
         raise exc
     finally:
         current_user_data.is_waiting = False
-        if plugin_config.bingchat_show_is_waiting:
+        if plugin_config.bingchat_display_is_waiting:
             await bot.delete_msg(message_id=message_is_asking['message_id'])
 
     # 检查后保存响应值
@@ -136,30 +138,8 @@ async def bingchat_command_chat(
 
     # 发送响应值
     try:
-        match plugin_config.bingchat_display_mode:
-            case 'text_simple' | 'text_detail':
-                data = await matcher.send(
-                    replyOut(
-                        event.message_id,
-                        current_user_data.history[-1].reply.get_content(
-                            plugin_config.bingchat_display_mode
-                        ),
-                    )
-                )
-            case 'image_simple' | 'image_detail':
-                img = await md_to_pic(
-                    current_user_data.history[-1].reply.get_content(
-                        plugin_config.bingchat_display_mode
-                    )
-                )
-                data = await matcher.send(
-                    replyOut(
-                        event.message_id,
-                        MessageSegment.image(img),
-                    )
-                )
-
-        reply_message_id_dict[data['message_id']] = current_user_data.sender.user_id
+        await getDisplayContent(current_user_data=current_user_data)
+        # reply_message_id_dict[data['message_id']] = current_user_data.sender.user_id
     except BingChatResponseException as exc:
         await matcher.finish(
             replyOut(event.message_id, f'<调用content_simple时出错>\n{str(exc)}')
@@ -179,10 +159,10 @@ async def bingchat_command_new_chat(
         await matcher.finish(replyOut(event.message_id, str(exc)))
 
     current_user_data = user_data_dict.setdefault(
-        event.sender.user_id, UserData(sender=event.sender)
+        UserInfo(platorm='qq', user_id=event.user_id), UserData(sender=Sender.parse_obj(event.sender.dict()))
     )
 
-    current_user_data.sender = event.sender
+    current_user_data.sender = Sender.parse_obj(event.sender.dict())
     current_user_data.chatbot = None
     current_user_data.conversation_count = 0
     current_user_data.history = []
@@ -209,27 +189,29 @@ async def bingchat_command_history_chat(
         await matcher.finish(replyOut(event.message_id, str(exc)))
 
     current_user_data = user_data_dict.setdefault(
-        event.sender.user_id, UserData(sender=event.sender)
+        UserInfo(platorm='qq', user_id=event.user_id), UserData(sender=Sender.parse_obj(event.sender.dict()))
     )
 
     # 如果该用户没有历史记录则终止
     if not current_user_data.history:
         await matcher.finish(replyOut(event.message_id, '您没有历史对话'))
 
-    nodes = historyOut(bot, current_user_data)
+    msg = historyOut(bot, current_user_data)
 
     if isinstance(event, GroupMessageEvent):
-        await bot.send_group_forward_msg(group_id=event.group_id, messages=nodes)
+        await bot.send_group_forward_msg(group_id=event.group_id, messages=msg)
     if isinstance(event, PrivateMessageEvent):
-        await bot.send_private_forward_msg(user_id=event.sender.user_id, messages=nodes)
+        await bot.send_private_forward_msg(user_id=event.user_id, messages=msg)
 
 
 @matcher_reply_to_continue_chat.handle()
 async def bingchat_message_all(
     bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = EventMessage()
 ):
+    if not event.reply:
+        raise Exception('这句话不应该出现')
+
     # 检查是否回复的是自己的对话
-    logger.debug(reply_message_id_dict[event.reply.message_id])
     if (
         not plugin_config.bingchat_share_chat
         and event.sender.user_id != reply_message_id_dict[event.reply.message_id]

@@ -1,5 +1,5 @@
 import time
-from typing import Any, Optional, Iterable
+from typing import Any, Optional
 
 from EdgeGPT import Chatbot
 from pydantic import BaseModel
@@ -10,67 +10,92 @@ from nonebot.rule import Rule, to_me
 from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
-from nonebot.adapters.onebot.v11.event import Sender
 
-from ..common.dataModel import Conversation
+from ..common.dataModel import (
+    DisplayContentTypes,
+    Conversation,
+    UserData,
+)
 from ..common.utils import (
     plugin_config,
+    reply_message_id_dict,
     isConfilctWithOtherMatcher,
 )
 
-
-class UserData(BaseModel):
-    sender: Sender
-
-    first_ask_message_id: Optional[int] = None
-    last_reply_message_id: int = 0
-
-    chatbot: Optional[Chatbot] = None
-    last_time: float = time.time()
-    is_waiting: bool = False
-    conversation_count: int = 0
-    history: list[Conversation] = []
-
-    class Config:
-        arbitrary_types_allowed = True
+if plugin_config.bingchat_display_mode in ('image_simple', 'image_detail'):
+    from nonebot_plugin_htmlrender import md_to_pic
 
 
-def replyOut(message_id: int, message_segment: MessageSegment | str) -> Message:
+def replyOut(
+    message_id: int, message_segment: MessageSegment | Message | str
+) -> Message:
     """返回一个回复消息"""
     return MessageSegment.reply(message_id) + message_segment
 
 
-def historyOut(bot: Bot, user_data: UserData) -> list[MessageSegment]:
+def historyOut(bot: Bot, user_data: UserData) -> Message:
     """将历史记录输出到消息列表并返回"""
-    nodes = []
+    msg = Message()
     for conversation in user_data.history:
-        nodes.append(
-            MessageSegment.node_custom(
-                user_id=user_data.sender.user_id,
-                nickname=user_data.sender.nickname,
-                content=conversation.ask,
-            )
+        msg += MessageSegment.node_custom(
+            user_id=user_data.sender.user_id,
+            nickname=user_data.sender.nickname,
+            content=conversation.ask,
         )
-        nodes.append(
-            MessageSegment.node_custom(
-                user_id=bot.self_id,
-                nickname='Bing',
-                content=conversation.reply.content_simple,
-            )
+        msg += MessageSegment.node_custom(
+            user_id=int(bot.self_id),
+            nickname='Bing',
+            content=conversation.reply.content_answer,
         )
-    return nodes
+
+    return msg
 
 
-def detailOut(bot: Bot, raw: dict) -> list[MessageSegment]:
-    nodes = []
-    return nodes
+async def getDisplayContentSegment(
+    current_user_data: UserData, content_type: DisplayContentTypes
+) -> Message:
+    """获取应该响应的信息片段"""
+    msg = Message()
+    
+    match content_type.split('.'):
+        case ['text', param]:
+            text = current_user_data.history[-1].reply.get_content(
+                
+            )
+            msg.append(MessageSegment.text(text))
+
+        case ['image', param]:
+            img = await md_to_pic(
+                current_user_data.history[-1].reply.get_content(
+                    
+                )
+            )
+            msg.append(MessageSegment.image(img))
+    
+    return msg
 
 
-# dict[user_id, UserData] user_id: UserData
-user_data_dict: dict[int, UserData] = dict()
+async def getDisplayContent(current_user_data: UserData) -> list[Message]:
+    """获取应该响应的信息"""
+    message_segment_list:list[Message] = []
+    for content_type in plugin_config.bingchat_display_content_types:
+        match content_type:
+            case 'text-simple' | 'text-detail':
+                text = current_user_data.history[-1].reply.get_content(
+                    type=plugin_config.bingchat_display_content_types
+                )
+                message_segment_list.append(MessageSegment.text(text))
 
-# dict[message_id, user_id] bot回答的问题的message_id: 对应的用户的user_id
-reply_message_id_dict: dict[int, int] = dict()
+            case 'image-simple' | 'image-detail':
+                img = await md_to_pic(
+                    current_user_data.history[-1].reply.get_content(
+                        type=plugin_config.bingchat_display_content_types
+                    )
+                )
+                message_segment_list.append(MessageSegment.image(img))
+
+    return message_segment_list
+
 
 
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
