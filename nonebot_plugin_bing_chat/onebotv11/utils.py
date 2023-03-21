@@ -1,19 +1,17 @@
-import time
-from typing import Any, Optional
-
-from EdgeGPT import Chatbot
-from pydantic import BaseModel
+import re
+from typing import Literal
 
 from nonebot import Bot
 from nonebot.log import logger
-from nonebot.rule import Rule, to_me
+from nonebot.rule import Rule
 from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
 
 from ..common.data_model import (
-    DisplayContentTypes,
-    Conversation,
+    DisplayType,
+    ResponseContentType,
+    DisplayContentType,
     UserData,
 )
 from ..common.utils import (
@@ -22,7 +20,7 @@ from ..common.utils import (
     is_confilct_with_other_matcher,
 )
 
-if plugin_config.bingchat_display_mode in ('image_simple', 'image_detail'):
+if any('image' in i for i in plugin_config.bingchat_display_content_types):
     from nonebot_plugin_htmlrender import md_to_pic
 
 
@@ -39,63 +37,80 @@ def history_out(bot: Bot, user_data: UserData) -> Message:
     for conversation in user_data.history:
         msg += MessageSegment.node_custom(
             user_id=user_data.sender.user_id,
-            nickname=user_data.sender.nickname,
+            nickname=user_data.sender.user_name,
             content=conversation.ask,
         )
         msg += MessageSegment.node_custom(
             user_id=int(bot.self_id),
             nickname='Bing',
-            content=conversation.reply.content_answer,
+            content=conversation.response.content_answer,
         )
 
     return msg
 
 
-async def get_display_content_segment(
-    current_user_data: UserData, content_type: DisplayContentTypes
+async def get_display_message(
+    current_user_data: UserData, display_content_type: DisplayContentType
 ) -> Message:
     """获取应该响应的信息片段"""
     msg = Message()
-    
-    match content_type.split('.'):
-        case ['text', param]:
-            text = current_user_data.history[-1].reply.get_content(
-                
-            )
-            msg.append(MessageSegment.text(text))
+    display_type: DisplayType
+    content_type_list: list[ResponseContentType]
+    display_type, *content_type_list = re.split(r'[\.&]', display_content_type)  # type: ignore
 
-        case ['image', param]:
-            img = await md_to_pic(
-                current_user_data.history[-1].reply.get_content(
-                    
-                )
-            )
+    message_plain_text_list: list[str] = []         
+    match display_type:
+        case 'text':
+            for content_type in content_type_list:
+                content = current_user_data.lastest_response.get_content(type=content_type)
+                match content_type:
+                    case 'answer':
+                        message_plain_text_list.append(content)
+                    case 'reference':
+                        new_content = '参考链接：\n' + content
+                        message_plain_text_list.append(new_content)
+                    case 'suggested-question':
+                        new_content = '猜你想问：\n' + content
+                        message_plain_text_list.append(new_content)
+                    case 'num-max-conversation':
+                        new_content = '回复数：' + content
+                        message_plain_text_list.append(new_content)
+                    case _:
+                        raise ValueError(f'无效的content_type：{content_type}')
+            msg.append(MessageSegment.text('\n\n'.join(message_plain_text_list)))
+
+        case 'image':
+            for content_type in content_type_list:
+                content = current_user_data.lastest_response.get_content(type=content_type)
+                match content_type:
+                    case 'answer':
+                        message_plain_text_list.append(content)
+                    case 'reference':
+                        new_content = '参考链接：\n\n' + content
+                        message_plain_text_list.append(new_content)
+                    case 'suggested-question':
+                        new_content = '猜你想问：\n\n' + content
+                        message_plain_text_list.append(new_content)
+                    case 'num-max-conversation':
+                        new_content = '回复数：' + content
+                        message_plain_text_list.append(new_content)
+                    case _:
+                        raise ValueError(f'无效的content_type：{content_type}')
+            img = await md_to_pic('\n\n---\n\n'.join(message_plain_text_list))
             msg.append(MessageSegment.image(img))
-    
+
     return msg
 
 
 async def get_display_content(current_user_data: UserData) -> list[Message]:
     """获取应该响应的信息"""
-    message_segment_list:list[Message] = []
-    for content_type in plugin_config.bingchat_display_content_types:
-        match content_type:
-            case 'text-simple' | 'text-detail':
-                text = current_user_data.history[-1].reply.get_content(
-                    type=plugin_config.bingchat_display_content_types
-                )
-                message_segment_list.append(MessageSegment.text(text))
+    message_list: list[Message] = []
 
-            case 'image-simple' | 'image-detail':
-                img = await md_to_pic(
-                    current_user_data.history[-1].reply.get_content(
-                        type=plugin_config.bingchat_display_content_types
-                    )
-                )
-                message_segment_list.append(MessageSegment.image(img))
+    for display_content_type in plugin_config.bingchat_display_content_types:
+        msg = await get_display_message(current_user_data, display_content_type)
+        message_list.append(msg)
 
-    return message_segment_list
-
+    return message_list
 
 
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:

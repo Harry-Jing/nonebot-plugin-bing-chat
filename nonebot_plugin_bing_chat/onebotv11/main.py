@@ -23,7 +23,7 @@ from ..common.exceptions import (
     BingChatConversationReachLimitException,
 )
 from ..common.data_model import (
-    DisplayContentTypes,
+    DisplayContentType,
     Sender,
     UserInfo,
     UserData,
@@ -71,7 +71,15 @@ async def bingchat_command_chat(
         current_user_data = user_data
     else:
         current_user_data = user_data_dict.setdefault(
-            UserInfo(platorm='qq', user_id=event.user_id), UserData(sender=Sender.parse_obj(event.sender.dict()))
+            UserInfo(platorm='qq', user_id=event.user_id),
+            UserData(
+                sender=Sender(
+                    user_id=event.user_id,
+                    user_name=(
+                        event.sender.nickname if event.sender.nickname else '<未知的的用户名>'
+                    ),
+                )
+            ),
         )
 
     if not current_user_data.first_ask_message_id:
@@ -106,7 +114,7 @@ async def bingchat_command_chat(
             conversation_style=plugin_config.bingchat_conversation_style,
         )
         """ from ..example_data import get_example_response
-        user_input_text = 'python的asyncio库是干什么的'
+        user_input_text = 'python中asyncio有什么用，并举例代码'
         response = get_example_response() """
     except Exception as exc:
         await matcher.send(reply_out(event.message_id, f'<无法询问，如果出现多次请试刷新>\n{exc}'))
@@ -121,7 +129,7 @@ async def bingchat_command_chat(
         if plugin_config.bingchat_log:
             create_log(str(response))
         current_user_data.history.append(
-            Conversation(ask=user_input_text, reply=BingChatResponse(raw=response))
+            Conversation(ask=user_input_text, response=BingChatResponse(raw=response))
         )
     except BingChatAccountReachLimitException as exc:
         await matcher.finish(reply_out(event.message_id, f'<请尝联系管理员>\n{exc}'))
@@ -138,8 +146,12 @@ async def bingchat_command_chat(
 
     # 发送响应值
     try:
-        await get_display_content(current_user_data=current_user_data)
-        # reply_message_id_dict[data['message_id']] = current_user_data.sender.user_id
+        msg_list = await get_display_content(current_user_data=current_user_data)
+        for i in msg_list:
+            data = await matcher.send(i)
+            reply_message_id_dict[data['message_id']] = UserInfo(
+                platorm='qq', user_id=event.user_id
+            )
     except BingChatResponseException as exc:
         await matcher.finish(
             reply_out(event.message_id, f'<调用content_simple时出错>\n{str(exc)}')
@@ -159,7 +171,15 @@ async def bingchat_command_new_chat(
         await matcher.finish(reply_out(event.message_id, str(exc)))
 
     current_user_data = user_data_dict.setdefault(
-        UserInfo(platorm='qq', user_id=event.user_id), UserData(sender=Sender.parse_obj(event.sender.dict()))
+        UserInfo(platorm='qq', user_id=event.user_id),
+        UserData(
+            sender=Sender(
+                user_id=event.user_id,
+                user_name=(
+                    event.sender.nickname if event.sender.nickname else '<未知的的用户名>'
+                ),
+            )
+        ),
     )
 
     current_user_data.sender = Sender.parse_obj(event.sender.dict())
@@ -189,7 +209,15 @@ async def bingchat_command_history_chat(
         await matcher.finish(reply_out(event.message_id, str(exc)))
 
     current_user_data = user_data_dict.setdefault(
-        UserInfo(platorm='qq', user_id=event.user_id), UserData(sender=Sender.parse_obj(event.sender.dict()))
+        UserInfo(platorm='qq', user_id=event.user_id),
+        UserData(
+            sender=Sender(
+                user_id=event.user_id,
+                user_name=(
+                    event.sender.nickname if event.sender.nickname else '<未知的的用户名>'
+                ),
+            )
+        ),
     )
 
     # 如果该用户没有历史记录则终止

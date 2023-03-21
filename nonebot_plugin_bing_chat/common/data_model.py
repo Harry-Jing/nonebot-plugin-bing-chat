@@ -15,49 +15,29 @@ from .exceptions import (
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
 )
+from .data_type import DisplayContentType
 
 
 def remove_quote_str(string: str) -> str:
     return re.sub(r'\[\^\d+?\^\]', '', string)
 
 
+def get_response_content_handler(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except (IndexError, KeyError) as exc:
+            raise BingChatResponseException('<无效的响应值>') from exc
+
+    return inner
+
+
 FilterMode: TypeAlias = Literal['whitelist', 'blacklist']
 ConversationStyle: TypeAlias = Literal['creative', 'balanced', 'precise']
-ResponseContentType: TypeAlias = Literal['answer', 'reference', 'suggested-question']
-DisplayContentTypes: TypeAlias = Literal[
-    'text.answer',
-    'text.reference',
-    'text.suggested-question',
-    'text.answer&reference',
-    'text.answer&suggested-question',
-    'text.reference&answer',
-    'text.reference&suggested-question',
-    'text.suggested-question&answer',
-    'text.suggested-question&reference',
-    'text.answer&reference&suggested-question',
-    'text.answer&suggested-question&reference',
-    'text.reference&answer&suggested-question',
-    'text.reference&suggested-question&answer',
-    'text.suggested-question&answer&reference',
-    'text.suggested-question&reference&answer',
-    'image.answer',
-    'image.reference',
-    'image.suggested-question',
-    'image.answer&reference',
-    'image.answer&suggested-question',
-    'image.reference&answer',
-    'image.reference&suggested-question',
-    'image.suggested-question&answer',
-    'image.suggested-question&reference',
-    'image.answer&reference&suggested-question',
-    'image.answer&suggested-question&reference',
-    'image.reference&answer&suggested-question',
-    'image.reference&suggested-question&answer',
-    'image.suggested-question&answer&reference',
-    'image.suggested-question&reference&answer',
+DisplayType: TypeAlias = Literal['text', 'image']
+ResponseContentType: TypeAlias = Literal[
+    'answer', 'reference', 'suggested-question', 'num-max-conversation'
 ]
-# *('text-'+'&'.join(i) for i in itertools.chain.from_iterable(itertools.permutations(options, r) for r in range(1, len(options) + 1)))
-# *('image-'+'&'.join(i) for i in itertools.chain.from_iterable(itertools.permutations(options, r) for r in range(1, len(options) + 1)))
 
 
 class Config(BaseModel, extra=Extra.ignore):
@@ -75,7 +55,7 @@ class Config(BaseModel, extra=Extra.ignore):
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_mode: Literal['direct', 'forward'] = 'direct'  # TODO
-    bingchat_display_content_types: list[DisplayContentTypes] = ['text.answer']
+    bingchat_display_content_types: list[DisplayContentType] = ['text.answer']
 
     bingchat_log: bool = True
     bingchat_plugin_directory: Path = Path('./data/BingChat')
@@ -179,6 +159,51 @@ class BingChatResponse(BaseModel):
                 logger.error('<未知的错误>')
                 raise BingChatResponseException('<未知的错误, 请管理员查看控制台>')
 
+    @property
+    @get_response_content_handler
+    def num_conversation(self) -> int:
+        return self.raw["item"]["throttling"]["numUserMessagesInConversation"]
+
+    @property
+    @get_response_content_handler
+    def max_conversation(self) -> int:
+        return self.raw["item"]["throttling"]["maxNumUserMessagesInConversation"]
+
+    @property
+    @get_response_content_handler
+    def content_answer(self) -> str:
+        return remove_quote_str(self.raw["item"]["messages"][1]["text"])
+
+    @property
+    @get_response_content_handler
+    def content_reference(self) -> str:
+        return '\n'.join('- ' + i for i in self.source_attributions_url_list)
+
+    @property
+    def content_suggested_question(self) -> str:
+        return '\n'.join('- ' + i for i in self.suggested_question_list)
+
+    @property
+    @get_response_content_handler
+    def adaptive_cards(self) -> list:
+        return self.raw["item"]["messages"][1]["adaptiveCards"][0]['body']
+
+    @property
+    @get_response_content_handler
+    def source_attributions_url_list(self) -> list[str]:
+        urls = []
+        for i in self.raw["item"]["messages"][1]['sourceAttributions']:
+            urls.append(i['seeMoreUrl'])
+        return urls
+
+    @property
+    @get_response_content_handler
+    def suggested_question_list(self) -> list[str]:
+        suggested_questions = []
+        for i in self.raw["item"]["messages"][1]["suggestedResponses"]:
+            suggested_questions.append(i['text'])
+        return suggested_questions
+
     def get_content(self, type: ResponseContentType = 'answer') -> str:
         match type:
             case 'answer':
@@ -187,47 +212,10 @@ class BingChatResponse(BaseModel):
                 return self.content_reference
             case 'suggested-question':
                 return self.content_suggested_question
+            case 'num-max-conversation':
+                return f'{self.num_conversation}/{self.max_conversation}'
             case _:
-                return ''
-
-    @property
-    def content_answer(self) -> str:
-        try:
-            return remove_quote_str(self.raw["item"]["messages"][1]["text"])
-        except (IndexError, KeyError) as exc:
-            logger.error(self.raw)
-            raise BingChatResponseException('<无效的响应值>') from exc
-
-    @property
-    def content_reference(self) -> str:
-        try:
-            return remove_quote_str(self.adaptive_cards[0]['text'])
-        except (IndexError, KeyError) as exc:
-            logger.error(self.raw)
-            raise BingChatResponseException('<无效的响应值>') from exc
-
-    @property
-    def content_suggested_question(self) -> str:
-        return '\n'.join(self.suggested_questions)
-
-    @property
-    def adaptive_cards(self) -> list:
-        try:
-            return self.raw["item"]["messages"][1]["adaptiveCards"][0]['body']
-        except (IndexError, KeyError) as exc:
-            logger.error(self.raw)
-            raise BingChatResponseException('<无效的响应值>') from exc
-
-    @property
-    def suggested_questions(self) -> list[str]:
-        suggested_questions = []
-        try:
-            for i in self.raw["item"]["messages"][1]["suggestedResponses"]:
-                suggested_questions.append(i['text'])
-            return suggested_questions
-        except (IndexError, KeyError) as exc:
-            logger.error(self.raw)
-            raise BingChatResponseException('<无效的响应值>') from exc
+                raise TypeError(f'<无效的类型：{type}>')
 
 
 class UserInfo(BaseModel, frozen=True):  # type: ignore
@@ -237,12 +225,12 @@ class UserInfo(BaseModel, frozen=True):  # type: ignore
 
 class Sender(BaseModel, extra=Extra.ignore):
     user_id: int
-    nickname: str
+    user_name: str
 
 
 class Conversation(BaseModel):
     ask: str
-    reply: BingChatResponse
+    response: BingChatResponse
 
 
 class UserData(BaseModel, arbitrary_types_allowed=True):
@@ -257,6 +245,14 @@ class UserData(BaseModel, arbitrary_types_allowed=True):
     conversation_count: int = 0
     history: list[Conversation] = []
 
-    @validator('sender', pre=True)
-    def sender_validator(cls, v) -> Sender:
-        return Sender(**v)
+    @property
+    def lastest_conversation(self) -> Conversation:
+        return self.history[-1]
+
+    @property
+    def lastest_ask(self) -> str:
+        return self.history[-1].ask
+
+    @property
+    def lastest_response(self) -> BingChatResponse:
+        return self.history[-1].response

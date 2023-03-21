@@ -19,7 +19,7 @@ plugin_log_directory = plugin_directory / 'log'
 plugin_log_directory.mkdir(parents=True, exist_ok=True)
 
 
-if plugin_config.bingchat_display_mode in ('image_simple', 'image_detail'):
+if any('image' in i for i in plugin_config.bingchat_display_content_types):
     try:
         require("nonebot_plugin_htmlrender")
     except RuntimeError as exc:
