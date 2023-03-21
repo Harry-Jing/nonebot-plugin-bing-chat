@@ -54,6 +54,7 @@ class Config(BaseModel, extra=Extra.ignore):
     bingchat_command_history_chat: set[str] = {'chat-history'}
 
     bingchat_display_is_waiting: bool = True
+    bingchat_display_in_forward: bool = False
     bingchat_display_mode: Literal['direct', 'forward'] = 'direct'  # TODO
     bingchat_display_content_types: list[DisplayContentType] = ['text.answer']
 
@@ -120,6 +121,10 @@ class BingChatResponse(BaseModel):
                 logger.error('<Bing账号到达今日请求上限>')
                 raise BingChatAccountReachLimitException('<Bing账号到达今日请求上限>')
 
+            case {'item': {'result': {'value': 'InvalidSession'}}}:
+                logger.error('<无效的会话>')
+                raise BingChatResponseException('<无效的会话>')
+
             case {
                 'item': {
                     'result': {'value': 'Success'},
@@ -130,8 +135,20 @@ class BingChatResponse(BaseModel):
                 }
             } if num_conver > max_conver:
                 raise BingChatConversationReachLimitException(
-                    f'<达到对话上限>\n最大对话次数：{max_conver}\n你的话次数：{num_conver}'
+                    f'<达到对话上限>\n对话术达到上限：{num_conver}/{max_conver}'
                 )
+
+            case {
+                'item': {
+                    'result': {'value': 'Success'},
+                    'messages': [
+                        {'offense': 'Offensive'},
+                        _,
+                    ],
+                }
+            }:
+                logger.error(f'<Bing检测到冒犯性文字，拒绝回答')
+                raise BingChatResponseException(f'<Bing检测到冒犯性文字，拒绝回答>')
 
             case {
                 'item': {
@@ -142,7 +159,8 @@ class BingChatResponse(BaseModel):
                     ],
                 }
             }:
-                raise BingChatResponseException(f'<Bing检测到敏感问题，无法回答>\n{hiddenText}')
+                logger.error(f'<Bing检测到敏感问题，自动隐藏>\n{hiddenText}')
+                raise BingChatResponseException(f'<Bing检测到敏感问题，自动隐藏>\n{hiddenText}')
 
             case {
                 'item': {

@@ -46,6 +46,8 @@ from .utils import (
     reply_out,
     history_out,
     get_display_content,
+    get_display_content_forward,
+    default_get_user_data,
     matcher_reply_to_continue_chat,
 )
 
@@ -71,16 +73,8 @@ async def bingchat_command_chat(
     if user_data:
         current_user_data = user_data
     else:
-        current_user_data = user_data_dict.setdefault(
-            UserInfo(platorm='qq', user_id=event.user_id),
-            UserData(
-                sender=Sender(
-                    user_id=event.user_id,
-                    user_name=(
-                        event.sender.nickname if event.sender.nickname else '<未知的的用户名>'
-                    ),
-                )
-            ),
+        current_user_data = default_get_user_data(
+            event=event, user_data_dict=user_data_dict
         )
 
     if not current_user_data.first_ask_message_id:
@@ -147,12 +141,24 @@ async def bingchat_command_chat(
 
     # 发送响应值
     try:
-        msg_list = await get_display_content(current_user_data=current_user_data)
-        for i in msg_list:
-            data = await matcher.send(i)
-            reply_message_id_dict[data['message_id']] = UserInfo(
-                platorm='qq', user_id=event.user_id
-            )
+        # 合并转发
+        if plugin_config.bingchat_display_in_forward:
+            msg = await get_display_content_forward(current_user_data=current_user_data)
+            if isinstance(event, GroupMessageEvent):
+                await bot.send_group_forward_msg(group_id=event.group_id, messages=msg)
+            if isinstance(event, PrivateMessageEvent):
+                await bot.send_private_forward_msg(user_id=event.user_id, messages=msg)
+
+        # 直接发送
+        else:
+            msg_list = await get_display_content(current_user_data=current_user_data)
+            for msg, i in zip(msg_list, range(len(msg_list))):
+                data = await matcher.send(
+                    msg if i else reply_out(message_id=event.message_id, content=msg)
+                )
+                reply_message_id_dict[data['message_id']] = UserInfo(
+                    platorm='qq', user_id=event.user_id
+                )
     except BingChatResponseException as exc:
         await matcher.finish(
             reply_out(event.message_id, f'<调用content_simple时出错>\n{str(exc)}')
@@ -171,19 +177,14 @@ async def bingchat_command_new_chat(
     except BaseBingChatException as exc:
         await matcher.finish(reply_out(event.message_id, str(exc)))
 
-    current_user_data = user_data_dict.setdefault(
-        UserInfo(platorm='qq', user_id=event.user_id),
-        UserData(
-            sender=Sender(
-                user_id=event.user_id,
-                user_name=(
-                    event.sender.nickname if event.sender.nickname else '<未知的的用户名>'
-                ),
-            )
-        ),
+    current_user_data = current_user_data = default_get_user_data(
+        event=event, user_data_dict=user_data_dict
     )
 
-    current_user_data.sender = Sender.parse_obj(event.sender.dict())
+    current_user_data.sender = Sender(
+        user_id=event.user_id,
+        user_name=(event.sender.nickname if event.sender.nickname else '<未知的的用户名>'),
+    )
     current_user_data.chatbot = None
     current_user_data.conversation_count = 0
     current_user_data.history = []
@@ -209,16 +210,8 @@ async def bingchat_command_history_chat(
     except BaseBingChatException as exc:
         await matcher.finish(reply_out(event.message_id, str(exc)))
 
-    current_user_data = user_data_dict.setdefault(
-        UserInfo(platorm='qq', user_id=event.user_id),
-        UserData(
-            sender=Sender(
-                user_id=event.user_id,
-                user_name=(
-                    event.sender.nickname if event.sender.nickname else '<未知的的用户名>'
-                ),
-            )
-        ),
+    current_user_data = current_user_data = default_get_user_data(
+        event=event, user_data_dict=user_data_dict
     )
 
     # 如果该用户没有历史记录则终止

@@ -12,6 +12,8 @@ from ..common.data_model import (
     DisplayType,
     ResponseContentType,
     DisplayContentType,
+    Sender,
+    UserInfo,
     UserData,
 )
 from ..common.utils import (
@@ -24,11 +26,26 @@ if any('image' in i for i in plugin_config.bingchat_display_content_types):
     from nonebot_plugin_htmlrender import md_to_pic
 
 
-def reply_out(
-    message_id: int, message_segment: MessageSegment | Message | str
-) -> Message:
+def default_get_user_data(
+    event: MessageEvent, user_data_dict: dict[UserInfo, UserData]
+) -> UserData:
+    current_user_data = user_data_dict.setdefault(
+        UserInfo(platorm='qq', user_id=event.user_id),
+        UserData(
+            sender=Sender(
+                user_id=event.user_id,
+                user_name=(
+                    event.sender.nickname if event.sender.nickname else '<未知的的用户名>'
+                ),
+            )
+        ),
+    )
+    return current_user_data
+
+
+def reply_out(message_id: int, content: MessageSegment | Message | str) -> Message:
     """返回一个回复消息"""
-    return MessageSegment.reply(message_id) + message_segment
+    return MessageSegment.reply(message_id) + content
 
 
 def history_out(bot: Bot, user_data: UserData) -> Message:
@@ -58,11 +75,16 @@ async def get_display_message(
     content_type_list: list[ResponseContentType]
     display_type, *content_type_list = re.split(r'[\.&]', display_content_type)  # type: ignore
 
-    message_plain_text_list: list[str] = []         
+    message_plain_text_list: list[str] = []
     match display_type:
         case 'text':
             for content_type in content_type_list:
-                content = current_user_data.lastest_response.get_content(type=content_type)
+                if not (
+                    content := current_user_data.lastest_response.get_content(
+                        type=content_type
+                    )
+                ):
+                    continue
                 match content_type:
                     case 'answer':
                         message_plain_text_list.append(content)
@@ -81,7 +103,12 @@ async def get_display_message(
 
         case 'image':
             for content_type in content_type_list:
-                content = current_user_data.lastest_response.get_content(type=content_type)
+                if not (
+                    content := current_user_data.lastest_response.get_content(
+                        type=content_type
+                    )
+                ):
+                    continue
                 match content_type:
                     case 'answer':
                         message_plain_text_list.append(content)
@@ -104,14 +131,25 @@ async def get_display_message(
 
 async def get_display_content(current_user_data: UserData) -> list[Message]:
     """获取应该响应的信息"""
-    message_list: list[Message] = []
-
+    msg_list: list[Message] = []
     for display_content_type in plugin_config.bingchat_display_content_types:
         msg = await get_display_message(current_user_data, display_content_type)
-        message_list.append(msg)
+        msg_list.append(msg)
 
-    return message_list
+    return msg_list
 
+
+async def get_display_content_forward(current_user_data: UserData) -> Message:
+    """获取应该响应的信息"""
+    _msg = Message()
+    for display_content_type in plugin_config.bingchat_display_content_types:
+        msg = await get_display_message(current_user_data, display_content_type)
+        _msg += MessageSegment.node_custom(
+            user_id=current_user_data.sender.user_id,
+            nickname=current_user_data.sender.user_name,
+            content=msg
+        )
+    return _msg
 
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
     if (
