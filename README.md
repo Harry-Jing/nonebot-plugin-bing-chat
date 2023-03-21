@@ -94,7 +94,7 @@ QQ群：366731501
 | bingchat_command_history_chat | str/list[str] | ["chat-history"] | 返回历史对话命令 |
 | bingchat_block | bool | False | 是否block |
 | bingchat_priority | int | 1 | 指令的优先级 |
-| bingchat_command_to_me | bool | False | 所有命令是否需要@bot |
+| bingchat_to_me | bool | False | 所有命令是否需要@bot |
 | bingchat_share_chat | bool | False | 他人是否可以用过回复bot而进行对话 |
   
  <b> 对行为进行配置 </b>
