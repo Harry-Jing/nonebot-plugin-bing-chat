@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from EdgeGPT import Chatbot
@@ -127,7 +128,7 @@ async def bingchat_command_chat(
     # 检查后保存响应值
     try:
         if plugin_config.bingchat_log:
-            create_log(str(response))
+            create_log(json.dumps(response))
         current_user_data.history.append(
             Conversation(ask=user_input_text, response=BingChatResponse(raw=response))
         )
