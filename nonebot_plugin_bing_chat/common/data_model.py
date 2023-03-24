@@ -55,7 +55,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_in_forward: bool = False
-    bingchat_display_mode: Literal['direct', 'forward'] = 'direct'  # TODO
+    bingchat_display_mode: Literal['direct', 'forward'] = 'direct'
     bingchat_display_content_types: list[DisplayContentType] = ['text.answer']
 
     bingchat_log: bool = True
@@ -71,17 +71,11 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     def __init__(self, **data) -> None:
         if 'bingchat_show_detail' in data:
-            logger.warning('<bingchat_show_detail>将在0.8弃用，请使用<bingchat_display_modes>')
-            data['bingchat_display_mode'] = (
-                ['text-answer&reference']
-                if data['bingchat_show_detail']
-                else ['text-answer']
-            )
+            logger.error('<bingchat_show_detail>已经弃用，请使用<bingchat_display_content_types>')
         if 'bingchat_show_is_waiting' in data:
-            logger.warning(
-                '<bingchat_show_is_waiting>将在0.8弃用，请使用<bingchat_display_is_waiting>'
+            logger.error(
+                '<bingchat_show_is_waiting>已经弃用，请使用<bingchat_display_is_waiting>'
             )
-            data['bingchat_display_is_waiting'] = data['bingchat_show_is_waiting']
         super().__init__(**data)
 
     @validator('bingchat_command_chat', pre=True)
@@ -102,8 +96,8 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
             raise ValueError('bingchat_command_history_chat不能为空')
         return set(v)
 
-    @validator('bingchat_display_mode', pre=True)
-    def bingchat_display_mode_validator(cls, v) -> list:
+    @validator('bingchat_display_content_types', pre=True)
+    def bingchat_display_content_types_validator(cls, v) -> list:
         if not v:
             raise ValueError('bingchat_display_mode不能为空')
         return list(v)
