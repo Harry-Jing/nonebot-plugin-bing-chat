@@ -40,7 +40,7 @@ ResponseContentType: TypeAlias = Literal[
 ]
 
 
-class Config(BaseModel, extra=Extra.ignore):
+class PluginConfig(BaseModel, extra=Extra.ignore):
     superusers: set[int]
     command_start: set[str]
 
@@ -59,8 +59,10 @@ class Config(BaseModel, extra=Extra.ignore):
     bingchat_display_content_types: list[DisplayContentType] = ['text.answer']
 
     bingchat_log: bool = True
+    bingchat_proxy: Optional[str] = None
     bingchat_plugin_directory: Path = Path('./data/BingChat')
     bingchat_conversation_style: ConversationStyle = 'balanced'
+    bingchat_auto_switch_cookies: bool = False
     bingchat_auto_refresh_conversation: bool = True
 
     bingchat_group_filter_mode: FilterMode = 'blacklist'
@@ -260,7 +262,6 @@ class UserData(BaseModel, arbitrary_types_allowed=True):
     chatbot: Optional[Chatbot] = None
     last_time: float = time.time()
     is_waiting: bool = False
-    conversation_count: int = 0
     history: list[Conversation] = []
 
     @property
@@ -274,3 +275,25 @@ class UserData(BaseModel, arbitrary_types_allowed=True):
     @property
     def lastest_response(self) -> BingChatResponse:
         return self.history[-1].response
+
+    def clear(self, sender: Sender):
+        if self.chatbot is not None:
+            self.chatbot.close()
+
+        self.sender = sender
+        self.first_ask_message_id = None
+        self.last_reply_message_id = 0
+        self.chatbot = None
+        self.history = []
+
+
+class PluginData(BaseModel):
+    cookies_file_path_list: list[Path] = []
+    current_cookies_file_path: Path = Path()
+    is_switching_cookies: bool = False
+
+    # dict[user_id, UserData] user_id: UserData
+    user_data_dict: dict[UserInfo, UserData] = {}
+
+    # dict[message_id, user_id] bot回答的问题的message_id: 对应的用户的user_id
+    reply_message_id_dict: dict[int, UserInfo] = {}

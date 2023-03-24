@@ -8,6 +8,11 @@ from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
 
+
+from ..common import (
+    plugin_data,
+    plugin_config,
+)
 from ..common.data_model import (
     DisplayType,
     ResponseContentType,
@@ -17,8 +22,6 @@ from ..common.data_model import (
     UserData,
 )
 from ..common.utils import (
-    plugin_config,
-    reply_message_id_dict,
     is_confilct_with_other_matcher,
 )
 
@@ -129,7 +132,7 @@ async def get_display_message(
     return msg
 
 
-async def get_display_content(current_user_data: UserData) -> list[Message]:
+async def get_display_message_list(current_user_data: UserData) -> list[Message]:
     """获取应该响应的信息"""
     msg_list: list[Message] = []
     for display_content_type in plugin_config.bingchat_display_content_types:
@@ -139,7 +142,7 @@ async def get_display_content(current_user_data: UserData) -> list[Message]:
     return msg_list
 
 
-async def get_display_content_forward(current_user_data: UserData) -> Message:
+async def get_display_message_forward(current_user_data: UserData) -> Message:
     """获取应该响应的信息"""
     _msg = Message()
     for display_content_type in plugin_config.bingchat_display_content_types:
@@ -147,15 +150,16 @@ async def get_display_content_forward(current_user_data: UserData) -> Message:
         _msg += MessageSegment.node_custom(
             user_id=current_user_data.sender.user_id,
             nickname=current_user_data.sender.user_name,
-            content=msg
+            content=msg,
         )
     return _msg
+
 
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
     if (
         not to_me
         or not event.reply
-        or event.reply.message_id not in reply_message_id_dict
+        or event.reply.message_id not in plugin_data.reply_message_id_dict
         or is_confilct_with_other_matcher(event.message.extract_plain_text())
     ):
         return False

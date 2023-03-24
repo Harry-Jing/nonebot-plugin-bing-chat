@@ -17,6 +17,15 @@ from nonebot.adapters.onebot.v11 import (
 
 from nonebot_plugin_apscheduler import scheduler
 
+
+from ..common import (
+    plugin_data,
+    plugin_config,
+    command_chat,
+    command_new_chat,
+    command_history_chat,
+    HELP_MESSAGE,
+)
 from ..common.exceptions import (
     BaseBingChatException,
     BingChatResponseException,
@@ -32,21 +41,15 @@ from ..common.data_model import (
     BingChatResponse,
 )
 from ..common.utils import (
-    plugin_config,
-    command_chat,
-    command_new_chat,
-    command_history_chat,
-    user_data_dict,
-    reply_message_id_dict,
-    HELP_MESSAGE,
     create_log,
+    switch_to_useable_cookies,
 )
 from .check import check_if_in_list, check_if_user_is_waiting_for_response
 from .utils import (
     reply_out,
     history_out,
-    get_display_content,
-    get_display_content_forward,
+    get_display_message_list,
+    get_display_message_forward,
     default_get_user_data,
     matcher_reply_to_continue_chat,
 )
@@ -70,11 +73,14 @@ async def bingchat_command_chat(
     except BaseBingChatException as exc:
         await matcher.finish(reply_out(event.message_id, str(exc)))
 
+    if plugin_data.is_switching_cookies:
+        await matcher.finish(reply_out(event.message_id, '正在切换cookies，请稍后再试'))
+
     if user_data:
         current_user_data = user_data
     else:
         current_user_data = default_get_user_data(
-            event=event, user_data_dict=user_data_dict
+            event=event, user_data_dict=plugin_data.user_data_dict
         )
 
     if not current_user_data.first_ask_message_id:
@@ -90,7 +96,8 @@ async def bingchat_command_chat(
     try:
         if not current_user_data.chatbot:
             current_user_data.chatbot = Chatbot(
-                cookiePath='./data/BingChat/cookies.json'
+                cookiePath=plugin_data.current_cookies_file_path,
+                proxy=plugin_config.bingchat_proxy,
             )
     except Exception as exc:
         await matcher.send(reply_out(event.message_id, f'<无法创建Chatbot>\n{exc}'))
@@ -127,6 +134,24 @@ async def bingchat_command_chat(
             Conversation(ask=user_input_text, response=BingChatResponse(raw=response))
         )
     except BingChatAccountReachLimitException as exc:
+        if plugin_config.bingchat_auto_switch_cookies:
+            await matcher.send(
+                reply_out(event.message_id, f'检测到达到账户上限，将自动刷新账户，所有对话将被清空')
+            )
+            if not await switch_to_useable_cookies():
+                await matcher.finish('无可用cookies')
+            for user_data in plugin_data.user_data_dict.values():
+                user_data.clear(
+                    sender=Sender(
+                        user_id=event.user_id,
+                        user_name=(
+                            event.sender.nickname
+                            if event.sender.nickname
+                            else '<未知的的用户名>'
+                        ),
+                    )
+                )
+            await matcher.finish('已切换cookies')
         await matcher.finish(reply_out(event.message_id, f'<请尝联系管理员>\n{exc}'))
     except BingChatConversationReachLimitException as exc:
         if plugin_config.bingchat_auto_refresh_conversation:
@@ -143,7 +168,7 @@ async def bingchat_command_chat(
     try:
         # 合并转发
         if plugin_config.bingchat_display_in_forward:
-            msg = await get_display_content_forward(current_user_data=current_user_data)
+            msg = await get_display_message_forward(current_user_data=current_user_data)
             if isinstance(event, GroupMessageEvent):
                 await bot.send_group_forward_msg(group_id=event.group_id, messages=msg)
             if isinstance(event, PrivateMessageEvent):
@@ -151,12 +176,14 @@ async def bingchat_command_chat(
 
         # 直接发送
         else:
-            msg_list = await get_display_content(current_user_data=current_user_data)
+            msg_list = await get_display_message_list(
+                current_user_data=current_user_data
+            )
             for msg, i in zip(msg_list, range(len(msg_list))):
                 data = await matcher.send(
                     msg if i else reply_out(message_id=event.message_id, content=msg)
                 )
-                reply_message_id_dict[data['message_id']] = UserInfo(
+                plugin_data.reply_message_id_dict[data['message_id']] = UserInfo(
                     platorm='qq', user_id=event.user_id
                 )
     except BingChatResponseException as exc:
@@ -178,16 +205,15 @@ async def bingchat_command_new_chat(
         await matcher.finish(reply_out(event.message_id, str(exc)))
 
     current_user_data = current_user_data = default_get_user_data(
-        event=event, user_data_dict=user_data_dict
+        event=event, user_data_dict=plugin_data.user_data_dict
     )
 
-    current_user_data.sender = Sender(
-        user_id=event.user_id,
-        user_name=(event.sender.nickname if event.sender.nickname else '<未知的的用户名>'),
+    current_user_data.clear(
+        sender=Sender(
+            user_id=event.user_id,
+            user_name=(event.sender.nickname if event.sender.nickname else '<未知的的用户名>'),
+        )
     )
-    current_user_data.chatbot = None
-    current_user_data.conversation_count = 0
-    current_user_data.history = []
 
     await matcher.send(reply_out(event.message_id, '已刷新对话'))
 
@@ -211,7 +237,7 @@ async def bingchat_command_history_chat(
         await matcher.finish(reply_out(event.message_id, str(exc)))
 
     current_user_data = current_user_data = default_get_user_data(
-        event=event, user_data_dict=user_data_dict
+        event=event, user_data_dict=plugin_data.user_data_dict
     )
 
     # 如果该用户没有历史记录则终止
@@ -236,12 +262,15 @@ async def bingchat_message_all(
     # 检查是否回复的是自己的对话
     if (
         not plugin_config.bingchat_share_chat
-        and event.sender.user_id != reply_message_id_dict[event.reply.message_id]
+        and event.sender.user_id
+        != plugin_data.reply_message_id_dict[event.reply.message_id]
     ):
         logger.error(f'用户{event.sender.user_id}试图继续别人的对话')
 
     # 获取最开始发送的用户数据
-    current_user_data = user_data_dict[reply_message_id_dict[event.reply.message_id]]
+    current_user_data = plugin_data.user_data_dict[
+        plugin_data.reply_message_id_dict[event.reply.message_id]
+    ]
 
     await bingchat_command_chat(
         bot=bot,

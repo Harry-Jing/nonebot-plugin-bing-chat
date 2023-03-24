@@ -5,7 +5,7 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
 )
 
-from ..common.utils import plugin_config
+from ..common import plugin_config
 from ..common.exceptions import (
     BingChatPermissionDeniedException,
     BingchatIsWaitingForResponseException,
