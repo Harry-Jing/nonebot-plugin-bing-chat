@@ -55,7 +55,6 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_in_forward: bool = False
-    bingchat_display_mode: Literal['direct', 'forward'] = 'direct'
     bingchat_display_content_types: list[DisplayContentType] = ['text.answer']
 
     bingchat_log: bool = True
