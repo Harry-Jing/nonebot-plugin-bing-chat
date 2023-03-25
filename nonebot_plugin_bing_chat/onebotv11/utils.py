@@ -7,7 +7,7 @@ from nonebot.rule import Rule
 from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
-
+from nonebot_plugin_guild_patch import GuildMessageEvent
 
 from ..common import (
     plugin_data,
@@ -30,7 +30,7 @@ if any('image' in i for i in plugin_config.bingchat_display_content_types):
 
 
 def default_get_user_data(
-    event: MessageEvent, user_data_dict: dict[UserInfo, UserData]
+        event: MessageEvent, user_data_dict: dict[UserInfo, UserData]
 ) -> UserData:
     current_user_data = user_data_dict.setdefault(
         UserInfo(platorm='qq', user_id=event.user_id),
@@ -46,9 +46,12 @@ def default_get_user_data(
     return current_user_data
 
 
-def reply_out(message_id: int, content: MessageSegment | Message | str) -> Message:
+def reply_out(event: MessageEvent, content: MessageSegment | Message | str) -> Message:
     """返回一个回复消息"""
-    return MessageSegment.reply(message_id) + content
+    if isinstance(event, GuildMessageEvent):
+        return Message(content)
+
+    return MessageSegment.reply(event.message_id) + content
 
 
 def history_out(bot: Bot, user_data: UserData) -> Message:
@@ -70,7 +73,7 @@ def history_out(bot: Bot, user_data: UserData) -> Message:
 
 
 async def get_display_message(
-    current_user_data: UserData, display_content_type: DisplayContentType
+        current_user_data: UserData, display_content_type: DisplayContentType
 ) -> Message:
     """获取应该响应的信息片段"""
     msg = Message()
@@ -83,9 +86,9 @@ async def get_display_message(
         case 'text':
             for content_type in content_type_list:
                 if not (
-                    content := current_user_data.lastest_response.get_content(
-                        type=content_type
-                    )
+                        content := current_user_data.lastest_response.get_content(
+                            type=content_type
+                        )
                 ):
                     continue
                 match content_type:
@@ -107,9 +110,9 @@ async def get_display_message(
         case 'image':
             for content_type in content_type_list:
                 if not (
-                    content := current_user_data.lastest_response.get_content(
-                        type=content_type
-                    )
+                        content := current_user_data.lastest_response.get_content(
+                            type=content_type
+                        )
                 ):
                     continue
                 match content_type:
@@ -157,10 +160,10 @@ async def get_display_message_forward(current_user_data: UserData) -> Message:
 
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
     if (
-        not to_me
-        or not event.reply
-        or event.reply.message_id not in plugin_data.reply_message_id_dict
-        or is_confilct_with_other_matcher(event.message.extract_plain_text())
+            not to_me
+            or not event.reply
+            or event.reply.message_id not in plugin_data.reply_message_id_dict
+            or is_confilct_with_other_matcher(event.message.extract_plain_text())
     ):
         return False
     return True
