@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-bing-chat"
-version = "0.7.0a5"
+version = "0.7.0"
 description = "基于nonebot2的bing-chat软件"
 license = "GPL-3.0-only"
 authors = ["Harry <harry0259@163.com>"]
@@ -25,7 +25,7 @@ include = ["nonebot_plugin_bing_chat/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-EdgeGPT = "^0.1.8"
+EdgeGPT = "^0.1.10.1"
 pydantic = "^1.10"
 nonebot2 = "^2.0.0rc3"
 nonebot-adapter-onebot = "^2.2.2"
