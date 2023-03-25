@@ -7,7 +7,7 @@ from nonebot.rule import Rule
 from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
-
+from nonebot_plugin_guild_patch import GuildMessageEvent
 
 from ..common import (
     plugin_data,
@@ -46,9 +46,12 @@ def default_get_user_data(
     return current_user_data
 
 
-def reply_out(message_id: int, content: MessageSegment | Message | str) -> Message:
+def reply_out(event: MessageEvent, content: MessageSegment | Message | str) -> Message:
     """返回一个回复消息"""
-    return MessageSegment.reply(message_id) + content
+    if isinstance(event, GuildMessageEvent):
+        return Message(content)
+
+    return MessageSegment.reply(event.message_id) + content
 
 
 def history_out(bot: Bot, user_data: UserData) -> Message:
