@@ -179,7 +179,7 @@ async def bingchat_command_chat(
             )
             for msg, i in zip(msg_list, range(len(msg_list))):
                 data = await matcher.send(
-                    msg if i else reply_out(message_id=event.message_id, content=msg)
+                    msg if i else reply_out(event=event, content=msg)
                 )
                 plugin_data.reply_message_id_dict[data['message_id']] = UserInfo(
                     platorm='qq', user_id=event.user_id
