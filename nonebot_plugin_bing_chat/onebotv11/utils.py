@@ -2,6 +2,7 @@ import time
 from typing import Any, Optional
 
 from EdgeGPT import Chatbot
+from nonebot_plugin_guild_patch import GuildMessageEvent
 from pydantic import BaseModel
 
 from nonebot import Bot
@@ -35,9 +36,12 @@ class UserData(BaseModel):
         arbitrary_types_allowed = True
 
 
-def replyOut(message_id: int, message_segment: MessageSegment | str) -> Message:
+def replyOut(event: MessageEvent, message_segment: MessageSegment | str) -> Message:
     """返回一个回复消息"""
-    return MessageSegment.reply(message_id) + message_segment
+    if isinstance(event, GuildMessageEvent):
+        return Message(message_segment)
+
+    return MessageSegment.reply(event.message_id) + message_segment
 
 
 def historyOut(bot: Bot, user_data: UserData) -> list[MessageSegment]:
@@ -75,10 +79,10 @@ reply_message_id_dict: dict[int, int] = dict()
 
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
     if (
-        not to_me
-        or not event.reply
-        or event.reply.message_id not in reply_message_id_dict
-        or isConfilctWithOtherMatcher(event.message.extract_plain_text())
+            not to_me
+            or not event.reply
+            or event.reply.message_id not in reply_message_id_dict
+            or isConfilctWithOtherMatcher(event.message.extract_plain_text())
     ):
         return False
     return True
