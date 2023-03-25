@@ -135,9 +135,7 @@ async def bingchat_command_chat(
         )
     except BingChatAccountReachLimitException as exc:
         if plugin_config.bingchat_auto_switch_cookies:
-            await matcher.send(
-                reply_out(event, f'检测到达到账户上限，将自动刷新账户，所有对话将被清空')
-            )
+            await matcher.send(reply_out(event, f'检测到达到账户上限，将自动刷新账户，所有对话将被清空'))
             if not await switch_to_useable_cookies():
                 await matcher.finish('无可用cookies')
             for user_data in plugin_data.user_data_dict.values():
@@ -187,16 +185,14 @@ async def bingchat_command_chat(
                     platorm='qq', user_id=event.user_id
                 )
     except BingChatResponseException as exc:
-        await matcher.finish(
-            reply_out(event, f'<调用content_simple时出错>\n{str(exc)}')
-        )
+        await matcher.finish(reply_out(event, f'<调用content_simple时出错>\n{str(exc)}'))
     finally:
         await chatbot.close()
 
 
 @command_new_chat.handle()
 async def bingchat_command_new_chat(
-        bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
+    bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
 ):
     # 检查用户和群组是否在名单中，如果没有则终止
     try:
@@ -224,7 +220,7 @@ async def bingchat_command_new_chat(
 
 @command_history_chat.handle()
 async def bingchat_command_history_chat(
-        bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
+    bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
 ):
     if isinstance(event, GuildMessageEvent):
         await matcher.finish("频道不支持合并转发，无法使用该功能！")
@@ -257,7 +253,7 @@ async def bingchat_command_history_chat(
 
 @matcher_reply_to_continue_chat.handle()
 async def bingchat_message_all(
-        bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = EventMessage()
+    bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = EventMessage()
 ):
     if not event.reply:
         raise Exception('这句话不应该出现')
