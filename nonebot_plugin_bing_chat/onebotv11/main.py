@@ -57,11 +57,11 @@ from .utils import (
 
 @command_chat.handle()
 async def bingchat_command_chat(
-        bot: Bot,
-        event: MessageEvent,
-        matcher: Matcher,
-        arg: Message = CommandArg(),
-        user_data: Optional[UserData] = None,
+    bot: Bot,
+    event: MessageEvent,
+    matcher: Matcher,
+    arg: Message = CommandArg(),
+    user_data: Optional[UserData] = None,
 ):
     # 如果arg为空，则返回帮助信息
     if not arg:
@@ -264,9 +264,9 @@ async def bingchat_message_all(
 
     # 检查是否回复的是自己的对话
     if (
-            not plugin_config.bingchat_share_chat
-            and event.sender.user_id
-            != plugin_data.reply_message_id_dict[event.reply.message_id]
+        not plugin_config.bingchat_share_chat
+        and event.sender.user_id
+        != plugin_data.reply_message_id_dict[event.reply.message_id]
     ):
         logger.error(f'用户{event.sender.user_id}试图继续别人的对话')
 
