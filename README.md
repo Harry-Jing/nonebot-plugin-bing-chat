@@ -26,34 +26,42 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 
 ## 📖 介绍
 
-一个可以使用新版Bing进行聊天的插件
+一个可以使用新版Bing进行聊天的插件 (现在又不需要代理了）
+
+目前支持[go-cqhttp](https://docs.go-cqhttp.org/)与[onebot v11](https://onebot.adapters.nonebot.dev/)适配器和[nonebot-plugin-guild-patch](https://github.com/mnixry/nonebot-plugin-guild-patch)
 
 QQ群：366731501
 
-能否给孩子一个star🌟吗
+给个star🌟?
 
-> 目前仅支持onebot v11
->
-> 5月份孩子有重要的考试，暂时随缘更新
+> 5月份有考试，暂时随缘更新
 >
 > 如果你有更多需求，请发布[issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues/new)让我知道
 
 ## 💿 安装与更新
 
 <details>
-<summary> <b> 使用 nb-cli 安装与更新 </b> </summary>
+<summary> <b> 使用 nb-cli 安装与更新 </b> </summary> </br>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
-
-    nb plugin install nonebot-plugin-bing-chat --upgrade
+  
+    nb plugin install --upgrade nonebot-plugin-bing-chat
+  
+对于发送图片的支持需要执行
+  
+    nb plugin install --upgrade nonebot-plugin-bing-chat[image]
 
 </details>
 
 <details>
-<summary> <b> 使用包管理器安装与更新 </b></summary>
+<summary> <b> 使用pip安装与更新 </b></summary> </br>
 在 nonebot2 项目的插件目录下, 打开命令行, 根据你使用的包管理器, 输入相应的安装命令
 
-    pip install nonebot-plugin-bing-chat --upgrade
+    pip install --upgrade nonebot-plugin-bing-chat 
 
+对于发送图片的支持需要执行
+
+    pip install --upgrade nonebot-plugin-bing-chat[image]
+    
 打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
 
     plugins = ["nonebot_plugin_bing_chat"]
@@ -62,12 +70,10 @@ QQ群：366731501
 
 ## ⚙️ 配置
 
-> 目前不能不使用代理进行访问，需要配置代理
-
 <details>
 <summary>
   <b>在 nonebot2 项目的<code>./data/BingChat/cookies</code>文件夹中添加<code>cookies.json</code>（必须） </b>
-</summary>
+</summary></br>
 
 - 在浏览器安装 `cookie-editor` 的插件
   - [Chrome/Edge](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)（需要魔法）
