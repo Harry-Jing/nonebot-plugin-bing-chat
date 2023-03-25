@@ -1,43 +1,43 @@
-[project]
+[tool.poetry]
 name = "nonebot-plugin-bing-chat"
+version = "0.7.0a5"
 description = "基于nonebot2的bing-chat软件"
-version = "0.6.6"
-authors = [
-    {name = "Harry", email = "Harry0259@163.com"},
-]
+license = "GPL-3.0-only"
+authors = ["Harry <harry0259@163.com>"]
+maintainers = ["Harry <harry0259@163.com>"]
 readme = "README.md"
-license = {text = "GPL-3"}
-requires-python = ">=3.10"
-dependencies = [
-    "EdgeGPT>=0.0.60",
-    "pydantic>=1.10",
-    "nonebot2>=2.0.0rc3",
-    "nonebot-adapter-onebot>=2.2.2",
-    "nonebot-plugin-apscheduler>=0.2.0",
+repository = "https://github.com/python-poetry/poetry"
+keywords = ["nonebot", "bot", "qq", "bing", "chatbot", "gpt"]
+classifiers = [
+  "Framework :: Pydantic",
+  "Topic :: Communications",
+  "License :: OSI Approved :: GNU General Public License (GPL)",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Natural Language :: Chinese (Simplified)",
 ]
-classifiers=[
-        "Framework :: Pydantic",
-        "Topic :: Communications",
-        "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: GNU General Public License (GPL)",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Natural Language :: Chinese (Simplified)",
-]
+packages = [{ include = "nonebot_plugin_bing_chat" }]
+include = ["nonebot_plugin_bing_chat/py.typed"]
 
-[project.urls]
-Homepage = "https://github.com/Harry-Jing/nonebot-plugin-bing-chat"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+EdgeGPT = "^0.1.8"
+pydantic = "^1.10"
+nonebot2 = "^2.0.0rc3"
+nonebot-adapter-onebot = "^2.2.2"
+nonebot-plugin-apscheduler = "^0.2.0"
+nonebot-plugin-htmlrender = { version = "^0.2.0.3", optional = true }
+
+
+[tool.poetry.extras]
+image = ["nonebot-plugin-htmlrender"]
+all = ["nonebot-plugin-htmlrender"]
 
 
 [build-system]
-requires = [
-  "setuptools >= 67.4.0",
-]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["nonebot_plugin_bing_chat*"]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
