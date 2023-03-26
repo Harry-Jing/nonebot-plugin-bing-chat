@@ -85,10 +85,9 @@ async def get_display_message(
                 new_content = ''
         message_plain_text_list.append(f'{new_content}{content}')
     if message_plain_text_list:
-        msg_content = '\n\n'.join(message_plain_text_list)
         match display_type:
             case 'text':
-                msg.append(MessageSegment.text(msg_content))
+                msg.append(MessageSegment.text('\n\n'.join(message_plain_text_list)))
             case 'image':
                 img = await md_to_pic('\n\n---\n\n'.join(message_plain_text_list))
                 msg.append(MessageSegment.image(img))
