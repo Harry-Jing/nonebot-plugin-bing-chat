@@ -1,14 +1,12 @@
-from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import (
-    MessageEvent,
-    PrivateMessageEvent,
     GroupMessageEvent,
+    MessageEvent,
 )
 
 from ..common import plugin_config
 from ..common.exceptions import (
-    BingChatPermissionDeniedException,
     BingchatIsWaitingForResponseException,
+    BingChatPermissionDeniedException,
 )
 from .utils import UserData
 

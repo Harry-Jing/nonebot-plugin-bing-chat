@@ -41,7 +41,7 @@ QQ群：366731501
 ## 💿 安装与更新
 
 <details>
-<summary> <b> 使用 nb-cli 安装与更新 </b> </summary> </br>
+<summary> <b> 使用 nb-cli 安装与更新 </b> </summary> <br>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
   
     nb plugin install --upgrade nonebot-plugin-bing-chat
@@ -53,7 +53,7 @@ QQ群：366731501
 </details>
 
 <details>
-<summary> <b> 使用pip安装与更新 </b></summary> </br>
+<summary> <b> 使用pip安装与更新 </b></summary> <br>
 在 nonebot2 项目的插件目录下, 打开命令行, 根据你使用的包管理器, 输入相应的安装命令
 
     pip install --upgrade nonebot-plugin-bing-chat 
@@ -73,7 +73,7 @@ QQ群：366731501
 <details>
 <summary>
   <b>在 nonebot2 项目的<code>./data/BingChat/cookies</code>文件夹中添加<code>cookies.json</code>（必须） </b>
-</summary></br>
+</summary><br>
 
 - 在浏览器安装 `cookie-editor` 的插件
   - [Chrome/Edge](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)（需要魔法）
@@ -91,7 +91,7 @@ QQ群：366731501
   <b> 在 nonebot2 项目的<code>.env</code>文件中添加下表中的配置（可选项） </b>
 </summary>
 
-</br> 在.env书写配置时，字符转要使用**双引号**，而**不是**单引号 </br>
+<br> 在.env书写配置时，字符转要使用**双引号**，而**不是**单引号 <br>
 
 
 <b> 命令配置 </b>

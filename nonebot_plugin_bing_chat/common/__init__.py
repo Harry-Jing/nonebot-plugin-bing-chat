@@ -1,14 +1,13 @@
+import importlib
 import json
 import shutil
-import importlib
 from datetime import datetime, timedelta
 
-from nonebot import  get_driver
-from nonebot.rule import Rule, command, to_me
+from nonebot import get_driver
 from nonebot.plugin.on import on_message
+from nonebot.rule import Rule, command, to_me
 
 from .data_model import PluginConfig, PluginData
-
 
 plugin_config = PluginConfig.parse_obj(get_driver().config)
 
@@ -40,32 +39,21 @@ matcher_reply_to_me = on_message(
     block=plugin_config.bingchat_block,
 )
 
-
-HELP_MESSAGE = (
-    (
-        f"""开始对话：{'/'.join(i for i in plugin_config.bingchat_command_chat)} + {{你要询问的内容}}"""
-        f"""\n\n"""
-        f"""新建一个对话：{'/'.join(i for i in plugin_config.bingchat_command_new_chat)}"""
-        f"""\n\n"""
-        f"""查看历史记录：{'/'.join(i for i in plugin_config.bingchat_command_history_chat)}"""
-        f"""\n\n"""
-        f"""如果有任何疑问请查看https://github.com/Harry-Jing/nonebot-plugin-bing-chat"""
-    )
-    if '' in plugin_config.command_start
-    else (
-        f"""以下所有的命令都要在开头加上命令符号！！！"""
-        f"""\n\n"""
-        f"""命令符号：{','.join(f'"{i}"' for i in plugin_config.command_start)}"""
-        f"""\n\n"""
-        f"""开始对话：{'/'.join(i for i in plugin_config.bingchat_command_chat)} + {{你要询问的内容}}"""
-        f"""\n\n"""
-        f"""新建一个对话：{'/'.join(i for i in plugin_config.bingchat_command_new_chat)}"""
-        f"""\n\n"""
-        f"""查看历史记录：{'/'.join(i for i in plugin_config.bingchat_command_history_chat)}"""
-        f"""\n\n"""
-        f"""如果有任何疑问请查看https://github.com/Harry-Jing/nonebot-plugin-bing-chat"""
-    )
+COMMON_HELP_MESSAGE = (
+    f"开始对话：{'/'.join(plugin_config.bingchat_command_chat)} + {{你要询问的内容}}\n\n"
+    f"新建一个对话：{'/'.join(plugin_config.bingchat_command_new_chat)}\n\n"
+    f"查看历史记录：{'/'.join(plugin_config.bingchat_command_history_chat)}\n\n"
+    '如果有任何疑问请查看https://github.com/Harry-Jing/nonebot-plugin-bing-chat'
 )
+if '' in plugin_config.command_start:
+    HELP_MESSAGE = COMMON_HELP_MESSAGE
+else:
+    command_symbols = ','.join(f'"{i}"' for i in plugin_config.command_start)
+    HELP_MESSAGE = (
+        f'以下所有的命令都要在开头加上命令符号！！！\n\n'
+        f'命令符号：{command_symbols}\n\n'
+        f'{COMMON_HELP_MESSAGE}'
+    )
 
 
 def init() -> None:
@@ -77,7 +65,7 @@ def init() -> None:
     plugin_cookies_path.mkdir(parents=True, exist_ok=True)
     plugin_cookies_file_path_list = list(plugin_cookies_path.glob('*.json'))
 
-    if len(plugin_cookies_file_path_list) == 0:
+    if not plugin_cookies_file_path_list:
         (plugin_cookies_path / 'cookies.json').touch(exist_ok=True)
         raise RuntimeError(
             'BingChat插件未配置cookie，请在./data/BingChat/cookies/cookies.json中填入你的cookie'
@@ -101,12 +89,12 @@ def init() -> None:
     plugin_log_directory.mkdir(parents=True, exist_ok=True)
 
     # 检查依赖
-    if any('image' in i for i in plugin_config.bingchat_display_content_types):
+    if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
         try:
             importlib.import_module('nonebot_plugin_htmlrender')
         except Exception as exc:
             raise RuntimeError(
-                "请使用 pip install nonebot-plugin-bing-chat[image] markdown渲染插件"
+                '请使用 pip install nonebot-plugin-bing-chat[image] markdown渲染插件'
             ) from exc
 
 
@@ -116,7 +104,7 @@ init()
 from nonebot_plugin_apscheduler import scheduler
 
 
-@scheduler.scheduled_job('cron', hour=2)
+@scheduler.scheduled_job('cron', hour=2)  # type: ignore
 async def _del_log_file() -> None:
     print('del_log_file')
     current_time = datetime.now()

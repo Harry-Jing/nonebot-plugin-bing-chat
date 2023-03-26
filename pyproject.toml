@@ -6,7 +6,7 @@ license = "GPL-3.0-only"
 authors = ["Harry <harry0259@163.com>"]
 maintainers = ["Harry <harry0259@163.com>"]
 readme = "README.md"
-repository = "https://github.com/python-poetry/poetry"
+repository = "https://github.com/Harry-Jing/nonebot-plugin-bing-chat"
 keywords = ["nonebot", "bot", "qq", "bing", "chatbot", "gpt"]
 classifiers = [
   "Framework :: Pydantic",
@@ -26,12 +26,12 @@ include = ["nonebot_plugin_bing_chat/py.typed"]
 [tool.poetry.dependencies]
 python = "^3.10"
 EdgeGPT = "^0.1.10.1"
-pydantic = "^1.10"
-nonebot2 = "^2.0.0rc3"
 nonebot-adapter-onebot = "^2.2.2"
 nonebot-plugin-apscheduler = "^0.2.0"
 nonebot-plugin-guild-patch = "^0.2.3"
 nonebot-plugin-htmlrender = { version = "^0.2.0.3", optional = true }
+nonebot2 = "^2.0.0rc3"
+pydantic = "^1.10.6"
 
 
 [tool.poetry.extras]

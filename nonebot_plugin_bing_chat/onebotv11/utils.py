@@ -1,49 +1,41 @@
-import re
-from typing import Literal
 
 from nonebot import Bot
-from nonebot.log import logger
-from nonebot.rule import Rule
+from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message
-from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent
+from nonebot.rule import Rule
 from nonebot_plugin_guild_patch import GuildMessageEvent
 
 from ..common import (
-    plugin_data,
     plugin_config,
+    plugin_data,
 )
 from ..common.data_model import (
-    DisplayType,
-    ResponseContentType,
     DisplayContentType,
     Sender,
-    UserInfo,
     UserData,
+    UserInfo,
 )
 from ..common.utils import (
-    is_confilct_with_other_matcher,
+    is_conflict_with_other_matcher,
 )
 
-if any('image' in i for i in plugin_config.bingchat_display_content_types):
+if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
     from nonebot_plugin_htmlrender import md_to_pic
 
 
 def default_get_user_data(
     event: MessageEvent, user_data_dict: dict[UserInfo, UserData]
 ) -> UserData:
-    current_user_data = user_data_dict.setdefault(
-        UserInfo(platorm='qq', user_id=event.user_id),
+    return user_data_dict.setdefault(
+        UserInfo(platform='qq', user_id=event.user_id),
         UserData(
             sender=Sender(
                 user_id=event.user_id,
-                user_name=(
-                    event.sender.nickname if event.sender.nickname else '<未知的的用户名>'
-                ),
+                user_name=event.sender.nickname or '<未知的的用户名>',
             )
         ),
     )
-    return current_user_data
 
 
 def reply_out(event: MessageEvent, content: MessageSegment | Message | str) -> Message:
@@ -77,61 +69,28 @@ async def get_display_message(
 ) -> Message:
     """获取应该响应的信息片段"""
     msg = Message()
-    display_type: DisplayType
-    content_type_list: list[ResponseContentType]
-    display_type, *content_type_list = re.split(r'[\.&]', display_content_type)  # type: ignore
+    display_type, content_type_list = display_content_type
 
     message_plain_text_list: list[str] = []
-    match display_type:
-        case 'text':
-            for content_type in content_type_list:
-                if not (
-                    content := current_user_data.lastest_response.get_content(
-                        type=content_type
-                    )
-                ):
-                    continue
-                match content_type:
-                    case 'answer':
-                        message_plain_text_list.append(content)
-                    case 'reference':
-                        new_content = '参考链接：\n' + content
-                        message_plain_text_list.append(new_content)
-                    case 'suggested-question':
-                        new_content = '猜你想问：\n' + content
-                        message_plain_text_list.append(new_content)
-                    case 'num-max-conversation':
-                        new_content = '回复数：' + content
-                        message_plain_text_list.append(new_content)
-                    case _:
-                        raise ValueError(f'无效的content_type：{content_type}')
-            msg.append(MessageSegment.text('\n\n'.join(message_plain_text_list)))
-
-        case 'image':
-            for content_type in content_type_list:
-                if not (
-                    content := current_user_data.lastest_response.get_content(
-                        type=content_type
-                    )
-                ):
-                    continue
-                match content_type:
-                    case 'answer':
-                        message_plain_text_list.append(content)
-                    case 'reference':
-                        new_content = '参考链接：\n\n' + content
-                        message_plain_text_list.append(new_content)
-                    case 'suggested-question':
-                        new_content = '猜你想问：\n\n' + content
-                        message_plain_text_list.append(new_content)
-                    case 'num-max-conversation':
-                        new_content = '回复数：' + content
-                        message_plain_text_list.append(new_content)
-                    case _:
-                        raise ValueError(f'无效的content_type：{content_type}')
-            img = await md_to_pic('\n\n---\n\n'.join(message_plain_text_list))
-            msg.append(MessageSegment.image(img))
-
+    for content_type in content_type_list:
+        content = current_user_data.latest_response.get_content(content_type)
+        match content_type:
+            case 'reference':
+                new_content = '参考链接：\n'
+            case 'suggested-question':
+                new_content = '猜你想问：\n'
+            case 'num-max-conversation':
+                new_content = '回复数：'
+            case _:
+                new_content = ''
+        message_plain_text_list.append(f'{new_content}{content}')
+    if message_plain_text_list:
+        match display_type:
+            case 'text':
+                msg.append(MessageSegment.text('\n\n'.join(message_plain_text_list)))
+            case 'image':
+                img = await md_to_pic('\n\n---\n\n'.join(message_plain_text_list))
+                msg.append(MessageSegment.image(img))
     return msg
 
 
@@ -159,14 +118,12 @@ async def get_display_message_forward(current_user_data: UserData) -> Message:
 
 
 def _rule_continue_chat(event: MessageEvent, to_me: bool = EventToMe()) -> bool:
-    if (
-        not to_me
-        or not event.reply
-        or event.reply.message_id not in plugin_data.reply_message_id_dict
-        or is_confilct_with_other_matcher(event.message.extract_plain_text())
-    ):
-        return False
-    return True
+    return bool(
+        to_me
+        and event.reply
+        and event.reply.message_id in plugin_data.reply_message_id_dict
+        and not is_conflict_with_other_matcher(event.message.extract_plain_text())
+    )
 
 
 matcher_reply_to_continue_chat = on_message(
