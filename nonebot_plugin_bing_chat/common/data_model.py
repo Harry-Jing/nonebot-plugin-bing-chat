@@ -1,7 +1,7 @@
 import re
 import time
 from pathlib import Path
-from typing import Literal, Optional, TypeAlias
+from typing import Any, Literal, Optional, TypeAlias
 
 from EdgeGPT import Chatbot
 from nonebot.log import logger
@@ -77,25 +77,25 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
         super().__init__(**data)
 
     @validator('bingchat_command_chat', pre=True)
-    def bingchat_command_chat_validator(cls, v) -> set:
+    def bingchat_command_chat_validator(cls, v) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_chat不能为空')
         return set(v)
 
     @validator('bingchat_command_new_chat', pre=True)
-    def bingchat_command_new_chat_validator(cls, v) -> set:
+    def bingchat_command_new_chat_validator(cls, v) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_new_chat不能为空')
         return set(v)
 
     @validator('bingchat_command_history_chat', pre=True)
-    def bingchat_command_history_chat_validator(cls, v) -> set:
+    def bingchat_command_history_chat_validator(cls, v) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_history_chat不能为空')
         return set(v)
 
     @validator('bingchat_display_content_types', pre=True)
-    def bingchat_display_content_types_validator(cls, v) -> list:
+    def bingchat_display_content_types_validator(cls, v) -> list[DisplayContentType]:
         if not v:
             raise ValueError('bingchat_display_content_types不能为空')
         types = []
@@ -120,10 +120,10 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
 
 class BingChatResponse(BaseModel):
-    raw: dict
+    raw: dict[str, Any]
 
     @validator('raw')
-    def raw_validator(cls, v):
+    def raw_validator(cls, v) -> Optional[dict[str, Any]]:
         match v:
             case {'item': {'result': {'value': 'Throttled'}}}:
                 logger.error('<Bing账号到达今日请求上限>')
@@ -211,7 +211,7 @@ class BingChatResponse(BaseModel):
 
     @property
     @get_response_content_handler
-    def adaptive_cards(self) -> list:
+    def adaptive_cards(self) -> list[str]:
         return list(self.raw['item']['messages'][1]['adaptiveCards'][0]['body'])
 
     @property
