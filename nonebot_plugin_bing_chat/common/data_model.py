@@ -1,7 +1,7 @@
 import re
 import time
 from pathlib import Path
-from typing import Any, Literal, Optional, TypeAlias
+from typing import Any, Callable, Literal, Optional, TypeAlias
 
 from EdgeGPT import Chatbot
 from nonebot.log import logger
@@ -18,8 +18,8 @@ def remove_quote_str(string: str) -> str:
     return re.sub(r'\[\^\d+?\^]', '', string)
 
 
-def get_response_content_handler(func):
-    def inner(*args, **kwargs):
+def get_response_content_handler(func: Callable[..., Any]) -> Callable[..., Any]:
+    def inner(*args: Any, **kwargs: Any) -> Any:
         try:
             return func(*args, **kwargs)
         except (IndexError, KeyError) as exc:
@@ -65,7 +65,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     bingchat_group_filter_blacklist: set[Optional[int]] = set()
     bingchat_group_filter_whitelist: set[Optional[int]] = set()
 
-    def __init__(self, **data) -> None:
+    def __init__(self, **data: Any) -> None:
         if 'bingchat_show_detail' in data:
             logger.error(
                 '<bingchat_show_detail>已经弃用，请使用<bingchat_display_content_types>'
@@ -77,25 +77,27 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
         super().__init__(**data)
 
     @validator('bingchat_command_chat', pre=True)
-    def bingchat_command_chat_validator(cls, v) -> set[str]:
+    def bingchat_command_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_chat不能为空')
         return set(v)
 
     @validator('bingchat_command_new_chat', pre=True)
-    def bingchat_command_new_chat_validator(cls, v) -> set[str]:
+    def bingchat_command_new_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_new_chat不能为空')
         return set(v)
 
     @validator('bingchat_command_history_chat', pre=True)
-    def bingchat_command_history_chat_validator(cls, v) -> set[str]:
+    def bingchat_command_history_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_history_chat不能为空')
         return set(v)
 
     @validator('bingchat_display_content_types', pre=True)
-    def bingchat_display_content_types_validator(cls, v) -> list[DisplayContentType]:
+    def bingchat_display_content_types_validator(
+            cls, v: Any
+    ) -> list[DisplayContentType]:
         if not v:
             raise ValueError('bingchat_display_content_types不能为空')
         types = []
@@ -115,7 +117,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
         return types
 
     @validator('bingchat_plugin_directory', pre=True)
-    def bingchat_plugin_directory_validator(cls, v) -> Path:
+    def bingchat_plugin_directory_validator(cls, v: Any) -> Path:
         return Path(v)
 
 
@@ -123,7 +125,7 @@ class BingChatResponse(BaseModel):
     raw: dict[str, Any]
 
     @validator('raw')
-    def raw_validator(cls, v) -> Optional[dict[str, Any]]:
+    def raw_validator(cls, v: dict[str, Any]) -> Optional[dict[str, Any]]:
         match v:
             case {'item': {'result': {'value': 'Throttled'}}}:
                 logger.error('<Bing账号到达今日请求上限>')
