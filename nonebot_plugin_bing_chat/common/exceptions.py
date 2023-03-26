@@ -10,7 +10,7 @@ BaseBingChatException
         - BingChatResponseException
             + BingChatAccountReachLimitException
             + BingChatConversationReachLimitException
-      
+
 """
 
 
