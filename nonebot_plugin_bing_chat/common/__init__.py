@@ -89,7 +89,7 @@ def init() -> None:
     plugin_log_directory.mkdir(parents=True, exist_ok=True)
 
     # 检查依赖
-    if any('image' in i for i in plugin_config.bingchat_display_content_types):
+    if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
         try:
             importlib.import_module('nonebot_plugin_htmlrender')
         except Exception as exc:

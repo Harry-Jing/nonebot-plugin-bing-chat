@@ -1,5 +1,3 @@
-import re
-from typing import Literal
 
 from nonebot import Bot
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
@@ -13,8 +11,6 @@ from ..common import (
     plugin_data,
 )
 from ..common.data_model import (
-    DisplayType,
-    ResponseContentType,
     DisplayContentType,
     Sender,
     UserData,
@@ -24,7 +20,7 @@ from ..common.utils import (
     is_conflict_with_other_matcher,
 )
 
-if any('image' in i for i in plugin_config.bingchat_display_content_types):
+if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
     from nonebot_plugin_htmlrender import md_to_pic
 
 
@@ -73,61 +69,29 @@ async def get_display_message(
 ) -> Message:
     """获取应该响应的信息片段"""
     msg = Message()
-    display_type: DisplayType
-    content_type_list: list[ResponseContentType]
-    display_type, *content_type_list = re.split(r'[\.&]', display_content_type)  # type: ignore
+    display_type, content_type_list = display_content_type
 
     message_plain_text_list: list[str] = []
-    match display_type:
-        case 'text':
-            for content_type in content_type_list:
-                if not (
-                    content := current_user_data.lastest_response.get_content(
-                        type=content_type
-                    )
-                ):
-                    continue
-                match content_type:
-                    case 'answer':
-                        message_plain_text_list.append(content)
-                    case 'reference':
-                        new_content = '参考链接：\n' + content
-                        message_plain_text_list.append(new_content)
-                    case 'suggested-question':
-                        new_content = '猜你想问：\n' + content
-                        message_plain_text_list.append(new_content)
-                    case 'num-max-conversation':
-                        new_content = '回复数：' + content
-                        message_plain_text_list.append(new_content)
-                    case _:
-                        raise ValueError(f'无效的content_type：{content_type}')
-            msg.append(MessageSegment.text('\n\n'.join(message_plain_text_list)))
-
-        case 'image':
-            for content_type in content_type_list:
-                if not (
-                    content := current_user_data.lastest_response.get_content(
-                        type=content_type
-                    )
-                ):
-                    continue
-                match content_type:
-                    case 'answer':
-                        message_plain_text_list.append(content)
-                    case 'reference':
-                        new_content = '参考链接：\n\n' + content
-                        message_plain_text_list.append(new_content)
-                    case 'suggested-question':
-                        new_content = '猜你想问：\n\n' + content
-                        message_plain_text_list.append(new_content)
-                    case 'num-max-conversation':
-                        new_content = '回复数：' + content
-                        message_plain_text_list.append(new_content)
-                    case _:
-                        raise ValueError(f'无效的content_type：{content_type}')
-            img = await md_to_pic('\n\n---\n\n'.join(message_plain_text_list))
-            msg.append(MessageSegment.image(img))
-
+    for content_type in content_type_list:
+        content = current_user_data.latest_response.get_content(content_type)
+        match content_type:
+            case 'reference':
+                new_content = '参考链接：\n'
+            case 'suggested-question':
+                new_content = '猜你想问：\n'
+            case 'num-max-conversation':
+                new_content = '回复数：'
+            case _:
+                new_content = ''
+        message_plain_text_list.append(f'{new_content}{content}')
+    if message_plain_text_list:
+        msg_content = '\n\n'.join(message_plain_text_list)
+        match display_type:
+            case 'text':
+                msg.append(MessageSegment.text(msg_content))
+            case 'image':
+                img = await md_to_pic('\n\n---\n\n'.join(message_plain_text_list))
+                msg.append(MessageSegment.image(img))
     return msg
 
 

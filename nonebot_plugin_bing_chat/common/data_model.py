@@ -12,7 +12,6 @@ from .exceptions import (
     BingChatConversationReachLimitException,
     BingChatResponseException,
 )
-from .data_type import DisplayContentType
 
 
 def remove_quote_str(string: str) -> str:
@@ -35,6 +34,7 @@ DisplayType: TypeAlias = Literal['text', 'image']
 ResponseContentType: TypeAlias = Literal[
     'answer', 'reference', 'suggested-question', 'num-max-conversation'
 ]
+DisplayContentType: TypeAlias = tuple[DisplayType, list[ResponseContentType]]
 
 
 class PluginConfig(BaseModel, extra=Extra.ignore):
@@ -52,7 +52,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_in_forward: bool = False
-    bingchat_display_content_types: list[DisplayContentType] = ['text.answer']
+    bingchat_display_content_types: list[DisplayContentType] = [('text', ['answer'])]
 
     bingchat_log: bool = True
     bingchat_proxy: Optional[str] = None
@@ -97,8 +97,22 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     @validator('bingchat_display_content_types', pre=True)
     def bingchat_display_content_types_validator(cls, v) -> list:
         if not v:
-            raise ValueError('bingchat_display_mode不能为空')
-        return list(v)
+            raise ValueError('bingchat_display_content_types不能为空')
+        types = []
+        for i in list(v):
+            display_type, *content_type_list = re.split(r'[.&]', i)
+            if display_type not in ['text', 'image']:
+                raise ValueError(f'无效的显示类型: {display_type}')
+            for content_type in content_type_list:
+                if content_type not in [
+                    'answer',
+                    'reference',
+                    'suggested-question',
+                    'num-max-conversation',
+                ]:
+                    raise ValueError(f'无效的响应类型: {content_type}')
+            types.append((display_type, content_type_list))
+        return types
 
     @validator('bingchat_plugin_directory', pre=True)
     def bingchat_plugin_directory_validator(cls, v) -> Path:
@@ -141,8 +155,8 @@ class BingChatResponse(BaseModel):
                     ],
                 }
             }:
-                logger.error(f'<Bing检测到冒犯性文字，拒绝回答')
-                raise BingChatResponseException(f'<Bing检测到冒犯性文字，拒绝回答>')
+                logger.error('<Bing检测到冒犯性文字，拒绝回答')
+                raise BingChatResponseException('<Bing检测到冒犯性文字，拒绝回答>')
 
             case {
                 'item': {
