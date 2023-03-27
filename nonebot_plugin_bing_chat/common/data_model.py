@@ -34,7 +34,7 @@ DisplayType: TypeAlias = Literal['text', 'image']
 ResponseContentType: TypeAlias = Literal[
     'answer', 'reference', 'suggested-question', 'num-max-conversation'
 ]
-DisplayContentType: TypeAlias = tuple[DisplayType, tuple[ResponseContentType]]
+DisplayContentType: TypeAlias = tuple[DisplayType, list[ResponseContentType]]
 
 
 class PluginConfig(BaseModel, extra=Extra.ignore):
@@ -52,7 +52,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_in_forward: bool = False
-    bingchat_display_content_types: list[DisplayContentType] = [('text', ('answer',))]
+    bingchat_display_content_types: list[DisplayContentType] = [('text', ['num-max-conversation', 'answer', 'suggested-question'])]
 
     bingchat_log: bool = True
     bingchat_proxy: Optional[str] = None
