@@ -112,7 +112,7 @@ QQ群：366731501
 |:----:|:----:|:----:|:----:|
 | bingchat_display_is_waiting | bool | True | 是否显示“正在请求” |
 | bingchat_display_in_forward | bool | False | 是否以合并转发的消息形式发送消息 |
-| bingchat_display_content_types | str/list[str] | ['text.answer'] | 输出的内容包括什么 |
+| bingchat_display_content_types | str/list[str] | ["text.num-max-conversation&answer&suggested-question"] | 输出的内容包括什么 |
   
   
  <b> 进行配置 </b>
