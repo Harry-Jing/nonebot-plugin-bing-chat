@@ -1,5 +1,4 @@
-
-from nonebot import Bot
+from nonebot.adapters import Bot
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from nonebot.params import EventToMe
 from nonebot.plugin.on import on_message

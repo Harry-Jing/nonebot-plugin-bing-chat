@@ -1,7 +1,7 @@
 import re
 import time
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, TypeAlias
+from typing import Any, Callable, Literal, Optional, TypeAlias, NoReturn
 
 from EdgeGPT import Chatbot
 from nonebot.log import logger
@@ -34,7 +34,7 @@ DisplayType: TypeAlias = Literal['text', 'image']
 ResponseContentType: TypeAlias = Literal[
     'answer', 'reference', 'suggested-question', 'num-max-conversation'
 ]
-DisplayContentType: TypeAlias = tuple[DisplayType, list[ResponseContentType]]
+DisplayContentType: TypeAlias = tuple[DisplayType, tuple[ResponseContentType]]
 
 
 class PluginConfig(BaseModel, extra=Extra.ignore):
@@ -52,7 +52,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_in_forward: bool = False
-    bingchat_display_content_types: list[DisplayContentType] = [('text', ['answer'])]
+    bingchat_display_content_types: list[DisplayContentType] = [('text', ('answer',))]
 
     bingchat_log: bool = True
     bingchat_proxy: Optional[str] = None
@@ -96,7 +96,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     @validator('bingchat_display_content_types', pre=True)
     def bingchat_display_content_types_validator(
-            cls, v: Any
+        cls, v: Any
     ) -> list[DisplayContentType]:
         if not v:
             raise ValueError('bingchat_display_content_types不能为空')
@@ -122,10 +122,10 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
 
 class BingChatResponse(BaseModel):
-    raw: dict[str, Any]
+    raw: dict[Any, Any]
 
     @validator('raw')
-    def raw_validator(cls, v: dict[str, Any]) -> Optional[dict[str, Any]]:
+    def raw_validator(cls, v: dict[Any, Any]) -> dict[Any, Any]:
         match v:
             case {'item': {'result': {'value': 'Throttled'}}}:
                 logger.error('<Bing账号到达今日请求上限>')
@@ -283,9 +283,9 @@ class UserData(BaseModel, arbitrary_types_allowed=True):
     def latest_response(self) -> BingChatResponse:
         return self.history[-1].response
 
-    def clear(self, sender: Sender) -> None:
+    async def clear(self, sender: Sender) -> None:
         if self.chatbot is not None:
-            self.chatbot.close()
+            await self.chatbot.close()
 
         self.sender = sender
         self.first_ask_message_id = None

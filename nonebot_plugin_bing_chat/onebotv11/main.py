@@ -2,7 +2,7 @@ import json
 from typing import Optional
 
 from EdgeGPT import Chatbot
-from nonebot import Bot
+from nonebot.adapters import Bot
 from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     Message,
@@ -88,7 +88,7 @@ async def bingchat_command_chat(
     try:
         if not current_user_data.chatbot:
             current_user_data.chatbot = Chatbot(
-                cookiePath=plugin_data.current_cookies_file_path,
+                cookiePath=plugin_data.current_cookies_file_path, # type: ignore 应该支持Path的
                 proxy=plugin_config.bingchat_proxy,
             )
     except Exception as exc:
@@ -132,7 +132,7 @@ async def bingchat_command_chat(
             if not await switch_to_usable_cookies():
                 await matcher.finish('无可用cookies')
             for user_data in plugin_data.user_data_dict.values():
-                user_data.clear(
+                await user_data.clear(
                     sender=Sender(
                         user_id=event.user_id,
                         user_name=(event.sender.nickname or '<未知的的用户名>'),
@@ -193,7 +193,7 @@ async def bingchat_command_new_chat(
         event=event, user_data_dict=plugin_data.user_data_dict
     )
 
-    current_user_data.clear(
+    await current_user_data.clear(
         sender=Sender(
             user_id=event.user_id,
             user_name=event.sender.nickname or '<未知的的用户名>',
