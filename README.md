@@ -163,3 +163,9 @@ QQ群：366731501
 
 - [@A-kirami](https://github.com/A-kirami)  项目使用了README[模板](https://github.com/A-kirami/nonebot-plugin-template)
 - [@acheong08](https://github.com/acheong08)  项目使用了与Bing通讯的接口 [EdgeGPT](https://github.com/acheong08/EdgeGPT)
+- [@he0119](https://github.com/he0119) 向他请教了一些问题，并耐心的指导了我
+
+### Contributor
+<a href="https://github.com/Harry-Jing/nonebot-plugin-bing-chat/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Harry-Jing/nonebot-plugin-bing-chat" />
+</a>
