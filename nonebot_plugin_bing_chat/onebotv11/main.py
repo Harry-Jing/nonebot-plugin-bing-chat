@@ -33,6 +33,7 @@ from ..common.exceptions import (
     BaseBingChatException,
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
+    BingChatInvalidSessionException,
     BingChatResponseException,
 )
 from ..common.utils import (
@@ -57,7 +58,14 @@ async def bingchat_command_chat(
     matcher: Matcher,
     arg: Message = CommandArg(),
     user_data: Optional[UserData] = None,
+    depth: int = 1,
 ) -> None:
+    # 防止无线递归
+    if depth >= 3:
+        return
+    else:
+        depth += 1
+
     # 如果arg为空，则返回帮助信息
     if not arg:
         await matcher.finish(HELP_MESSAGE)
@@ -88,7 +96,7 @@ async def bingchat_command_chat(
     try:
         if not current_user_data.chatbot:
             current_user_data.chatbot = Chatbot(
-                cookiePath=plugin_data.current_cookies_file_path, # type: ignore 应该支持Path的
+                cookiePath=plugin_data.current_cookies_file_path,  # type: ignore 应该支持Path的
                 proxy=plugin_config.bingchat_proxy,
             )
     except Exception as exc:
@@ -140,11 +148,14 @@ async def bingchat_command_chat(
                 )
             await matcher.finish('已切换cookies')
         await matcher.finish(reply_out(event, f'<请尝联系管理员>\n{exc}'))
-    except BingChatConversationReachLimitException as exc:
+    except (BingChatConversationReachLimitException,BingChatInvalidSessionException) as exc:
         if plugin_config.bingchat_auto_refresh_conversation:
-            await matcher.send(reply_out(event, '检测到达到对话上限，将自动刷新对话'))
+            if isinstance(exc, BingChatConversationReachLimitException):
+                await matcher.send(reply_out(event, '检测到达到对话上限，将自动刷新对话'))
+            if isinstance(exc, BingChatConversationReachLimitException):
+                await matcher.send(reply_out(event, '检测到达到对话过期，将自动刷新对话'))
             await bingchat_command_new_chat(
-                bot=bot, event=event, matcher=matcher, arg=arg
+                bot=bot, event=event, matcher=matcher, arg=arg, depth=depth
             )
             await matcher.finish()
         await matcher.finish(reply_out(event, f'<请尝试刷新>\n{exc}'))
@@ -181,7 +192,11 @@ async def bingchat_command_chat(
 
 @command_new_chat.handle()
 async def bingchat_command_new_chat(
-    bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
+    bot: Bot,
+    event: MessageEvent,
+    matcher: Matcher,
+    arg: Message = CommandArg(),
+    depth: int = 1,
 ) -> None:
     # 检查用户和群组是否在名单中，如果没有则终止
     try:
@@ -204,7 +219,7 @@ async def bingchat_command_new_chat(
 
     # 如果arg不为空
     if arg:
-        await bingchat_command_chat(bot=bot, event=event, matcher=matcher, arg=arg)
+        await bingchat_command_chat(bot=bot, event=event, matcher=matcher, arg=arg, depth=depth)
 
 
 @command_history_chat.handle()

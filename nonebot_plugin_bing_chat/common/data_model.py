@@ -1,7 +1,7 @@
 import re
 import time
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, TypeAlias, NoReturn
+from typing import Any, Callable, Literal, Optional, TypeAlias
 
 from EdgeGPT import Chatbot
 from nonebot.log import logger
@@ -10,6 +10,7 @@ from pydantic import BaseModel, Extra, validator
 from .exceptions import (
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
+    BingChatInvalidSessionException,
     BingChatResponseException,
 )
 
@@ -133,7 +134,7 @@ class BingChatResponse(BaseModel):
 
             case {'item': {'result': {'value': 'InvalidSession'}}}:
                 logger.error('<无效的会话>')
-                raise BingChatResponseException('<无效的会话>')
+                raise BingChatInvalidSessionException('<无效的会话>')
 
             case {
                 'item': {
