@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-bing-chat"
-version = "0.7.2"
+version = "0.7.3"
 description = "基于nonebot2的bing-chat软件"
 license = "GPL-3.0-only"
 authors = ["Harry <harry0259@163.com>"]
