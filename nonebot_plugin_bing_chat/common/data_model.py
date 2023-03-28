@@ -82,7 +82,9 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     bingchat_group_filter_mode: FilterMode = 'blacklist'
     bingchat_group_filter_blacklist: set[Optional[int]] = set()
-    bingchat_group_filter_whitelist: set[Optional[int]] = set()
+
+    bingchat_guild_filter_whitelist: set[Optional[int]] = set()
+    bingchat_guild_filter_blacklist: set[Optional[dict]] = set()
 
     def __init__(self, **data: Any) -> None:
         if 'bingchat_show_detail' in data:
@@ -115,7 +117,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     @validator('bingchat_display_content_types', pre=True)
     def bingchat_display_content_types_validator(
-        cls, v: Any
+            cls, v: Any
     ) -> list[DisplayContentType]:
         if not v:
             raise ValueError('bingchat_display_content_types不能为空')

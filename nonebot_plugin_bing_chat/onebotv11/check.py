@@ -2,6 +2,7 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     MessageEvent,
 )
+from nonebot_plugin_guild_patch import GuildMessageEvent
 
 from ..common import plugin_config
 from ..common.exceptions import (
@@ -28,12 +29,26 @@ def check_if_in_list(event: MessageEvent) -> str:
             case 'whitelist':
                 if event.group_id not in plugin_config.bingchat_group_filter_whitelist:
                     raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单')
+    elif isinstance(event, GuildMessageEvent):
+        match plugin_config.bingchat_group_filter_mode:
+            case 'blacklist':
+                if {
+                    "guild_id": str(event.guild_id),
+                    "group_id": str(event.channel_id)
+                } in plugin_config.bingchat_guild_filter_blacklist:
+                    raise BingChatPermissionDeniedException('您没有权限，此群组在黑名单')
 
+            case 'whitelist':
+                if {
+                    "guild_id": str(event.guild_id),
+                    "group_id": str(event.channel_id)
+                } not in plugin_config.bingchat_guild_filter_whitelist:
+                    raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单')
     return '在名单中'
 
 
 def check_if_user_is_waiting_for_response(
-    event: MessageEvent, user_data: UserData
+        event: MessageEvent, user_data: UserData
 ) -> str:
     """检查用户是否有对话在进行中，如果有则抛出异常"""
     if user_data.is_waiting:
