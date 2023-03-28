@@ -148,7 +148,10 @@ async def bingchat_command_chat(
                 )
             await matcher.finish('已切换cookies')
         await matcher.finish(reply_out(event, f'<请尝联系管理员>\n{exc}'))
-    except (BingChatConversationReachLimitException,BingChatInvalidSessionException) as exc:
+    except (
+        BingChatConversationReachLimitException,
+        BingChatInvalidSessionException,
+    ) as exc:
         if plugin_config.bingchat_auto_refresh_conversation:
             if isinstance(exc, BingChatConversationReachLimitException):
                 await matcher.send(reply_out(event, '检测到达到对话上限，将自动刷新对话'))
@@ -219,7 +222,9 @@ async def bingchat_command_new_chat(
 
     # 如果arg不为空
     if arg:
-        await bingchat_command_chat(bot=bot, event=event, matcher=matcher, arg=arg, depth=depth)
+        await bingchat_command_chat(
+            bot=bot, event=event, matcher=matcher, arg=arg, depth=depth
+        )
 
 
 @command_history_chat.handle()

@@ -53,7 +53,9 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_in_forward: bool = False
-    bingchat_display_content_types: list[DisplayContentType] = [('text', ['num-max-conversation', 'answer', 'suggested-question'])]
+    bingchat_display_content_types: list[DisplayContentType] = [
+        ('text', ['num-max-conversation', 'answer', 'suggested-question'])
+    ]
 
     bingchat_log: bool = True
     bingchat_proxy: Optional[str] = None
@@ -81,19 +83,19 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     def bingchat_command_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_chat不能为空')
-        return set(v)
+        return set(v) if not isinstance(v, str) else {v}
 
     @validator('bingchat_command_new_chat', pre=True)
     def bingchat_command_new_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_new_chat不能为空')
-        return set(v)
+        return set(v) if not isinstance(v, str) else {v}
 
     @validator('bingchat_command_history_chat', pre=True)
     def bingchat_command_history_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_history_chat不能为空')
-        return set(v)
+        return set(v) if not isinstance(v, str) else {v}
 
     @validator('bingchat_display_content_types', pre=True)
     def bingchat_display_content_types_validator(
