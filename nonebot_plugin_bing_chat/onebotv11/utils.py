@@ -16,6 +16,7 @@ from ..common.data_model import (
     UserInfo,
 )
 from ..common.utils import (
+    get_display_data,
     is_conflict_with_other_matcher,
 )
 
@@ -64,33 +65,19 @@ def history_out(bot: Bot, user_data: UserData) -> Message:
 
 
 async def get_display_message(
-    current_user_data: UserData, display_content_type: DisplayContentType
+    user_data: UserData, display_content_type: DisplayContentType
 ) -> Message:
     """获取应该响应的信息片段"""
-    msg = Message()
     display_type, content_type_list = display_content_type
 
-    message_plain_text_list: list[str] = []
-    for content_type in content_type_list:
-        content = current_user_data.latest_response.get_content(content_type)
-        match content_type:
-            case 'reference':
-                new_content = '参考链接：\n'
-            case 'suggested-question':
-                new_content = '猜你想问：\n'
-            case 'num-max-conversation':
-                new_content = '回复数：'
-            case _:
-                new_content = ''
-        message_plain_text_list.append(f'{new_content}{content}')
-    if message_plain_text_list:
-        match display_type:
-            case 'text':
-                msg.append(MessageSegment.text('\n\n'.join(message_plain_text_list)))
-            case 'image':
-                img = await md_to_pic('\n\n---\n\n'.join(message_plain_text_list))
-                msg.append(MessageSegment.image(img))
-    return msg
+    data = await get_display_data(user_data, display_content_type)
+
+    match display_type:
+        case 'text':
+            return Message(MessageSegment.text(data)) # type: ignore
+        case 'image':
+            return Message(MessageSegment.image(data))
+
 
 
 async def get_display_message_list(current_user_data: UserData) -> list[Message]:

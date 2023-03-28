@@ -105,11 +105,11 @@ async def bingchat_command_chat(
     else:
         chatbot = current_user_data.chatbot
 
-    message_is_asking = None
+    message_is_asking_data = None
     # 向Bing发送请求, 并获取响应值
     try:
         if plugin_config.bingchat_display_is_waiting:
-            message_is_asking = await matcher.send(reply_out(event, '正在请求'))
+            message_is_asking_data = await matcher.send(reply_out(event, '正在请求'))
         current_user_data.is_waiting = True
         user_input_text = arg.extract_plain_text()
         response = await chatbot.ask(
@@ -124,8 +124,8 @@ async def bingchat_command_chat(
         raise exc
     finally:
         current_user_data.is_waiting = False
-        if message_is_asking:
-            await bot.delete_msg(message_id=message_is_asking['message_id'])
+        if message_is_asking_data and not isinstance(event, GuildMessageEvent):
+            await bot.delete_msg(message_id=message_is_asking_data['message_id'])
 
     # 检查后保存响应值
     try:

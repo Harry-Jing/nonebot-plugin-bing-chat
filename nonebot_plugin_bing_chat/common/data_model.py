@@ -19,12 +19,13 @@ def remove_quote_str(string: str) -> str:
     return re.sub(r'\[\^\d+?\^]', '', string)
 
 
-def get_response_content_handler(func: Callable[..., Any]) -> Callable[..., Any]:
-    def inner(*args: Any, **kwargs: Any) -> Any:
-        try:
-            return func(*args, **kwargs)
-        except (IndexError, KeyError) as exc:
-            raise BingChatResponseException('<无效的响应值>') from exc
+def get_response_content_handler() -> TDecoratedFunc:
+    def decorator(func: TOriginalFunc) -> TDecoratedFunc:
+        def wrapper(*args, **kwargs) -> TReturn:  # type: ignore
+            try:
+                return func(*args, **kwargs)
+            except (IndexError, KeyError) as exc:
+                raise BingChatResponseException('<无效的响应值>') from exc
 
     return inner
 
@@ -191,36 +192,37 @@ class BingChatResponse(BaseModel):
                 raise BingChatResponseException('<未知的错误, 请管理员查看控制台>')
 
     @property
-    @get_response_content_handler
+    @get_response_content_handler()
     def num_conversation(self) -> int:
         return int(self.raw['item']['throttling']['numUserMessagesInConversation'])
 
     @property
-    @get_response_content_handler
+    @get_response_content_handler()
     def max_conversation(self) -> int:
         return int(self.raw['item']['throttling']['maxNumUserMessagesInConversation'])
 
     @property
-    @get_response_content_handler
+    @get_response_content_handler()
     def content_answer(self) -> str:
         return remove_quote_str(self.raw['item']['messages'][1]['text'])
 
     @property
-    @get_response_content_handler
+    @get_response_content_handler()
     def content_reference(self) -> str:
         return '\n'.join(f'- {i}' for i in self.source_attributions_url_list)
 
     @property
     def content_suggested_question(self) -> str:
+        print(self.suggested_question_list)
         return '\n'.join(f'- {i}' for i in self.suggested_question_list)
 
     @property
-    @get_response_content_handler
+    @get_response_content_handler()
     def adaptive_cards(self) -> list[str]:
         return list(self.raw['item']['messages'][1]['adaptiveCards'][0]['body'])
 
     @property
-    @get_response_content_handler
+    @get_response_content_handler()
     def source_attributions_url_list(self) -> list[str]:
         return [
             i['seeMoreUrl']
@@ -228,7 +230,7 @@ class BingChatResponse(BaseModel):
         ]
 
     @property
-    @get_response_content_handler
+    @get_response_content_handler()
     def suggested_question_list(self) -> list[str]:
         return [
             i['text'] for i in self.raw['item']['messages'][1]['suggestedResponses']
