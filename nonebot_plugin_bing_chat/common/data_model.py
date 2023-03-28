@@ -1,7 +1,16 @@
 import re
 import time
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, TypeAlias
+from typing import (
+    Any,
+    Callable,
+    Literal,
+    Optional,
+    TypeAlias,
+    TypeVar,
+    ParamSpec,
+    Concatenate,
+)
 
 from EdgeGPT import Chatbot
 from nonebot.log import logger
@@ -13,6 +22,19 @@ from .exceptions import (
     BingChatInvalidSessionException,
     BingChatResponseException,
 )
+
+FilterMode: TypeAlias = Literal['whitelist', 'blacklist']
+ConversationStyle: TypeAlias = Literal['creative', 'balanced', 'precise']
+DisplayType: TypeAlias = Literal['text', 'image']
+ResponseContentType: TypeAlias = Literal[
+    'answer', 'reference', 'suggested-question', 'num-max-conversation'
+]
+DisplayContentType: TypeAlias = tuple[DisplayType, list[ResponseContentType]]
+
+TParam = ParamSpec("TParam")
+TReturn = TypeVar("TReturn")
+TOriginalFunc = Callable[TParam, TReturn]
+TDecoratedFunc = Callable[Concatenate[TParam], TReturn]
 
 
 def remove_quote_str(string: str) -> str:
@@ -27,16 +49,9 @@ def get_response_content_handler() -> TDecoratedFunc:
             except (IndexError, KeyError) as exc:
                 raise BingChatResponseException('<无效的响应值>') from exc
 
-    return inner
+        return wrapper
 
-
-FilterMode: TypeAlias = Literal['whitelist', 'blacklist']
-ConversationStyle: TypeAlias = Literal['creative', 'balanced', 'precise']
-DisplayType: TypeAlias = Literal['text', 'image']
-ResponseContentType: TypeAlias = Literal[
-    'answer', 'reference', 'suggested-question', 'num-max-conversation'
-]
-DisplayContentType: TypeAlias = tuple[DisplayType, list[ResponseContentType]]
+    return decorator
 
 
 class PluginConfig(BaseModel, extra=Extra.ignore):
