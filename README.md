@@ -44,11 +44,7 @@ QQ群：366731501
 <summary> <b> 使用 nb-cli 安装与更新 </b> </summary> <br>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
   
-    nb plugin install --upgrade nonebot-plugin-bing-chat
-  
-对于发送图片的支持需要执行
-  
-    nb plugin install --upgrade nonebot-plugin-bing-chat[image]
+    nb plugin install nonebot-plugin-bing-chat --upgrade
 
 </details>
 
