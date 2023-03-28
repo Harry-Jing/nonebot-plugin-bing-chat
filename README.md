@@ -43,11 +43,11 @@ QQ群：366731501
 <details>
 <summary> <b> 使用 nb-cli 安装与更新 </b> </summary> <br>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
-  
+
     nb plugin install --upgrade nonebot-plugin-bing-chat
-  
+
 对于发送图片的支持需要执行
-  
+
     nb plugin install --upgrade nonebot-plugin-bing-chat[image]
 
 </details>
@@ -61,7 +61,7 @@ QQ群：366731501
 对于发送图片的支持需要执行
 
     pip install --upgrade nonebot-plugin-bing-chat[image]
-    
+
 打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
 
     plugins = ["nonebot_plugin_bing_chat"]
@@ -83,7 +83,7 @@ QQ群：366731501
 - 点击右下角的 `Export` 按钮（这会把cookie保存到你的剪切板上）
 - 把你复制道德内容放到 `cookies.json` 文件里
  <img src="https://raw.githubusercontent.com/Harry-Jing/nonebot-plugin-bing-chat/main/resources/How_to_export_cookies.png" max-height="100" alt="How_to_export_cookies" />
-  
+
 </details>
 
 <details>
@@ -101,6 +101,7 @@ QQ群：366731501
 | bingchat_command_chat | str/list[str] | ["chat"] | 对话命令 |
 | bingchat_command_new_chat | str/list[str] | ["chat-new", "刷新对话"] | 新建对话命令 |
 | bingchat_command_history_chat | str/list[str] | ["chat-history"] | 返回历史对话命令 |
+| bingchat_command_switch_style | str/list[str] | ['switch-style', '切换风格'] | 切换风格对话命令 |
 | bingchat_block | bool | False | 是否block |
 | bingchat_priority | int | 1 | 指令的优先级 |
 | bingchat_to_me | bool | False | 所有命令是否需要@bot |
@@ -113,8 +114,8 @@ QQ群：366731501
 | bingchat_display_is_waiting | bool | True | 是否显示“正在请求” |
 | bingchat_display_in_forward | bool | False | 是否以合并转发的消息形式发送消息 |
 | bingchat_display_content_types | str/list[str] | ["text.num-max-conversation&answer&suggested-question"] | 输出的内容包括什么 |
-  
-  
+
+
  <b> 进行配置 </b>
 | 配置项 | 类型 | 默认值 | 说明 |
 |:----:|:----:|:----:|:----:|
@@ -131,7 +132,7 @@ QQ群：366731501
 | bingchat_group_filter_mode | "whitelist"/"blacklist" | "blacklist" | 对群聊屏蔽的模式 |
 | bingchat_group_filter_blacklist | list[int] | [] | 黑名单列表 |
 | bingchat_group_filter_whitelist | list[int] | [] | 白名单列表 |
-  
+
 源码内容可以在[./nonebot_plugin_bing_chat/common/dataModel.py](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/blob/main/nonebot_plugin_bing_chat/common/dataModel.py)查看
 
 </details>
@@ -140,9 +141,9 @@ QQ群：366731501
 <summary>
   <b> 举例配置与效果 </b>
 </summary>
-  
+
 > 还没写，可以来QQ群来问我
-  
+
 </details>
 
 ## 🎉 使用
@@ -157,8 +158,8 @@ QQ群：366731501
 | chat-history | 所有人 | 否 | 私聊/群聊 | 返回历史对话 |
 
 **你可以回复bot的消息从而直接继续对话，而不用输入对话指令**
-  
-  
+
+
 ## 🌸 致谢
 
 - [@A-kirami](https://github.com/A-kirami)  项目使用了README[模板](https://github.com/A-kirami/nonebot-plugin-template)

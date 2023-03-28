@@ -33,6 +33,13 @@ command_history_chat = on_message(
     block=plugin_config.bingchat_block,
 )
 
+command_switch_style = on_message(
+    rule=command(*plugin_config.bingchat_command_switch_style)
+    & (to_me() if plugin_config.bingchat_to_me else Rule()),
+    priority=plugin_config.bingchat_priority,
+    block=plugin_config.bingchat_block,
+)
+
 matcher_reply_to_me = on_message(
     rule=to_me(),
     priority=plugin_config.bingchat_priority,

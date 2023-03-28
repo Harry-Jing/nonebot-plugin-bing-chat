@@ -50,6 +50,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     bingchat_command_chat: set[str] = {'chat'}
     bingchat_command_new_chat: set[str] = {'chat-new', '刷新对话'}
     bingchat_command_history_chat: set[str] = {'chat-history'}
+    bingchat_command_switch_style: set[str] = {'switch-style', '切换风格'}
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_in_forward: bool = False

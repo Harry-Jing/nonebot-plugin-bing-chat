@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import Optional, get_args
 
 from EdgeGPT import Chatbot
 from nonebot.adapters import Bot
@@ -7,8 +7,9 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     Message,
     MessageEvent,
-    PrivateMessageEvent,
+    PrivateMessageEvent, MessageSegment,
 )
+from nonebot.internal.params import ArgPlainText
 from nonebot.log import logger
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg, EventMessage
@@ -19,6 +20,7 @@ from ..common import (
     command_chat,
     command_history_chat,
     command_new_chat,
+    command_switch_style,
     plugin_config,
     plugin_data,
 )
@@ -28,6 +30,7 @@ from ..common.data_model import (
     Sender,
     UserData,
     UserInfo,
+    ConversationStyle
 )
 from ..common.exceptions import (
     BaseBingChatException,
@@ -50,15 +53,14 @@ from .utils import (
     reply_out,
 )
 
-
 @command_chat.handle()
 async def bingchat_command_chat(
-    bot: Bot,
-    event: MessageEvent,
-    matcher: Matcher,
-    arg: Message = CommandArg(),
-    user_data: Optional[UserData] = None,
-    depth: int = 1,
+        bot: Bot,
+        event: MessageEvent,
+        matcher: Matcher,
+        arg: Message = CommandArg(),
+        user_data: Optional[UserData] = None,
+        depth: int = 1,
 ) -> None:
     # 防止无线递归
     if depth >= 3:
@@ -96,7 +98,7 @@ async def bingchat_command_chat(
     try:
         if not current_user_data.chatbot:
             current_user_data.chatbot = Chatbot(
-                cookiePath=plugin_data.current_cookies_file_path,  # type: ignore 应该支持Path的
+                cookiePath=plugin_data.current_cookies_file_path,  # type: #ignore 应该支持Path的
                 proxy=plugin_config.bingchat_proxy,
             )
     except Exception as exc:
@@ -149,8 +151,8 @@ async def bingchat_command_chat(
             await matcher.finish('已切换cookies')
         await matcher.finish(reply_out(event, f'<请尝联系管理员>\n{exc}'))
     except (
-        BingChatConversationReachLimitException,
-        BingChatInvalidSessionException,
+            BingChatConversationReachLimitException,
+            BingChatInvalidSessionException,
     ) as exc:
         if plugin_config.bingchat_auto_refresh_conversation:
             if isinstance(exc, BingChatConversationReachLimitException):
@@ -195,11 +197,11 @@ async def bingchat_command_chat(
 
 @command_new_chat.handle()
 async def bingchat_command_new_chat(
-    bot: Bot,
-    event: MessageEvent,
-    matcher: Matcher,
-    arg: Message = CommandArg(),
-    depth: int = 1,
+        bot: Bot,
+        event: MessageEvent,
+        matcher: Matcher,
+        arg: Message = CommandArg(),
+        depth: int = 1,
 ) -> None:
     # 检查用户和群组是否在名单中，如果没有则终止
     try:
@@ -229,7 +231,7 @@ async def bingchat_command_new_chat(
 
 @command_history_chat.handle()
 async def bingchat_command_history_chat(
-    bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
+        bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
 ) -> None:
     if isinstance(event, GuildMessageEvent):
         await matcher.finish('频道不支持合并转发，无法使用该功能！')
@@ -262,16 +264,16 @@ async def bingchat_command_history_chat(
 
 @matcher_reply_to_continue_chat.handle()
 async def bingchat_message_all(
-    bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = EventMessage()
+        bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = EventMessage()
 ) -> None:
     if not event.reply:
         raise Exception('这句话不应该出现')
 
     # 检查是否回复的是自己的对话
     if (
-        not plugin_config.bingchat_share_chat
-        and event.sender.user_id
-        != plugin_data.reply_message_id_dict[event.reply.message_id]
+            not plugin_config.bingchat_share_chat
+            and event.sender.user_id
+            != plugin_data.reply_message_id_dict[event.reply.message_id]
     ):
         logger.error(f'用户{event.sender.user_id}试图继续别人的对话')
 
@@ -287,3 +289,42 @@ async def bingchat_message_all(
         arg=arg,
         user_data=current_user_data,
     )
+
+
+chat_styles = get_args(ConversationStyle)
+ret_hint_str = ""
+for i in range(len(chat_styles)):
+    ret_hint_str += f"{i + 1}.{chat_styles[i]}"
+    if i != len(chat_styles) - 1:
+        ret_hint_str += "\n"
+
+
+# 切换模式
+@command_switch_style.handle()
+async def bingchat_command_switch_style(
+        bot: Bot, event: MessageEvent, matcher: Matcher, arg: Message = CommandArg()
+) -> None:
+    await matcher.send(MessageSegment.text(f"当前为{plugin_config.bingchat_conversation_style}风格"), at_sender=True)
+    if selection := arg.extract_plain_text():
+        matcher.set_arg('selection', arg)
+
+
+@command_switch_style.got('selection',
+                          prompt=f"请选择(仅输入数字,注:前缀也不用)\n{ret_hint_str}")
+async def bingchat_command_switch_style_got(
+        bot: Bot, event: MessageEvent, matcher: Matcher, selection: str = ArgPlainText()):
+    # 输入判断
+    try:
+        selection = int(selection.strip()) - 1
+    except:
+        await matcher.reject(MessageSegment.text("请输入数字"), at_sender=True)
+    if selection < 0 or selection >= len(chat_styles):
+        await matcher.reject(MessageSegment.text("输入正确的数字"), at_sender=True)
+    # 切换
+    plugin_config.bingchat_conversation_style = chat_styles[selection]
+    # 刷新
+    await bingchat_command_new_chat(
+        bot=bot, event=event, matcher=matcher, arg=""
+    )
+    # 返回
+    await matcher.send(MessageSegment.text(f"已切换为{plugin_config.bingchat_conversation_style}风格"), at_sender=True)
