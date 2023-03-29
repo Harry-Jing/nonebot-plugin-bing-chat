@@ -125,9 +125,13 @@ QQ群：366731501
 | 配置项 | 类型 | 默认值 | 说明 |
 |:----:|:----:|:----:|:----:|
 | bingchat_group_filter_mode | "whitelist"/"blacklist" | "blacklist" | 对群聊屏蔽的模式 |
-| bingchat_group_filter_blacklist | list[int] | [] | 黑名单列表 |
-| bingchat_group_filter_whitelist | list[int] | [] | 白名单列表 |
-  
+| bingchat_group_filter_blacklist | list[int] | [] | QQ群黑名单列表 |
+| bingchat_group_filter_whitelist | list[int] | [] | QQ群白名单列表 |
+| bingchat_guild_filter_blacklist | list[dict] | [] | QQ频道黑名单列表 |
+| bingchat_guild_filter_whitelist | list[dict] | [] | QQ频道白名单列表 |
+
+频道的配置格式：`{"guild_id": "123456789", "channel_id": "123456789"}`
+
 源码内容可以在[./nonebot_plugin_bing_chat/common/dataModel.py](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/blob/main/nonebot_plugin_bing_chat/common/dataModel.py)查看
 
 </details>
