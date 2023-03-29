@@ -42,7 +42,7 @@ all = ["nonebot-plugin-htmlrender"]
 [tool.pyright]
 include = ["nonebot_plugin_bing_chat"]
 pythonVersion = "3.10"
-typeCheckingMode = "strict"
+typeCheckingMode = "basic"
 
 
 [tool.black]

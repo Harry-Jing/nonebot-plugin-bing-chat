@@ -74,11 +74,11 @@ QQ群：366731501
 - 在浏览器安装 `cookie-editor` 的插件
   - [Chrome/Edge](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)（需要魔法）
   - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/)
-- 打开[`www.bing.com/chat`](https://www.bing.com/chat)（需要魔法）
+- 使用Edge浏览器打开[`www.bing.com/chat`](https://www.bing.com/chat)（需要魔法）
 - 打开 `cookie-editor` 插件
 - 点击右下角的 `Export` 按钮（这会把cookie保存到你的剪切板上）
-- 把你复制道德内容放到 `cookies.json` 文件里
- <img src="https://raw.githubusercontent.com/Harry-Jing/nonebot-plugin-bing-chat/main/resources/How_to_export_cookies.png" max-height="100" alt="How_to_export_cookies" />
+- 把你复制道德内容放到 `cookies.json` 文件里 <img src="https://raw.githubusercontent.com/Harry-Jing/nonebot-plugin-bing-chat/main/resources/How_to_export_cookies.png" max-height="100" alt="How_to_export_cookies" />
+- （可选）你可以创建多个以`.json`结尾的cookies文件
   
 </details>
 
