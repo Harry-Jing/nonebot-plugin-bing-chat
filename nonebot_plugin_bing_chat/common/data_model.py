@@ -81,6 +81,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     bingchat_auto_refresh_conversation: bool = True
 
     bingchat_group_filter_mode: FilterMode = 'blacklist'
+    bingchat_group_filter_whitelist: set[Optional[int]] = set()
     bingchat_group_filter_blacklist: set[Optional[int]] = set()
 
     bingchat_guild_filter_whitelist: set[Optional[int]] = set()
