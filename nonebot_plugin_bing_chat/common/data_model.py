@@ -118,7 +118,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     @validator('bingchat_display_content_types', pre=True)
     def bingchat_display_content_types_validator(
-            cls, v: Any
+        cls, v: Any
     ) -> list[DisplayContentType]:
         if not v:
             raise ValueError('bingchat_display_content_types不能为空')
