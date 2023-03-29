@@ -74,10 +74,9 @@ async def get_display_message(
 
     match display_type:
         case 'text':
-            return Message(MessageSegment.text(data)) # type: ignore
+            return Message(MessageSegment.text(data))  # type: ignore
         case 'image':
             return Message(MessageSegment.image(data))
-
 
 
 async def get_display_message_list(current_user_data: UserData) -> list[Message]:
