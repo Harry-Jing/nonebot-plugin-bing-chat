@@ -128,8 +128,4 @@ dmypy.json
 .pyre/
 
 # NoneBot
-.env*
-!.env
-!.env.dev
-!.env.prod
 /data/
