@@ -37,8 +37,9 @@ from ..common.exceptions import (
     BingChatResponseException,
 )
 from ..common.utils import (
-    create_log,
-    switch_to_usable_cookies,
+    get_chatbot,
+    get_bing_response,
+    store_response,
 )
 from .check import check_if_in_list, check_if_user_is_waiting_for_response
 from .utils import (
@@ -92,78 +93,51 @@ async def bingchat_command_chat(
     except BaseBingChatException as exc:
         await matcher.finish(reply_out(event, str(exc)))
 
+    user_input_text = arg.extract_plain_text()
+
     # 获取Chatbot，如果没有则创建一个
-    try:
-        if not current_user_data.chatbot:
-            current_user_data.chatbot = Chatbot(
-                cookiePath=plugin_data.current_cookies_file_path,  # type: ignore 应该支持Path的
-                proxy=plugin_config.bingchat_proxy,
-            )
-    except Exception as exc:
-        await matcher.send(reply_out(event, f'<无法创建Chatbot>\n{exc}'))
-        raise exc
-    else:
-        chatbot = current_user_data.chatbot
+    chatbot = await get_chatbot(
+        event=event,
+        matcher=matcher,
+        user_data=current_user_data,
+        reply_out=reply_out, # type: ignore
+    )
 
     message_is_asking_data = None
+    if plugin_config.bingchat_display_is_waiting:
+        message_is_asking_data = await matcher.send(reply_out(event, '正在请求'))
     # 向Bing发送请求, 并获取响应值
-    try:
-        if plugin_config.bingchat_display_is_waiting:
-            message_is_asking_data = await matcher.send(reply_out(event, '正在请求'))
-        current_user_data.is_waiting = True
-        user_input_text = arg.extract_plain_text()
-        response = await chatbot.ask(
-            prompt=user_input_text,
-            conversation_style=plugin_config.bingchat_conversation_style,
-        )
-        """ from ..example_data import get_example_response
-        user_input_text = 'python中asyncio有什么用，并举例代码'
-        response = get_example_response() """
-    except Exception as exc:
-        await matcher.send(reply_out(event, f'<无法询问，如果出现多次请试刷新>\n{exc}'))
-        raise exc
-    finally:
-        current_user_data.is_waiting = False
-        if message_is_asking_data and not isinstance(event, GuildMessageEvent):
-            await bot.delete_msg(message_id=message_is_asking_data['message_id'])
+    response = await get_bing_response(
+        event=event,
+        matcher=matcher,
+        user_data=current_user_data,
+        reply_out=reply_out,  # type: ignore
+        chatbot=chatbot,
+        user_question=user_input_text,
+    )
+    if message_is_asking_data and not isinstance(event, GuildMessageEvent):
+        await bot.delete_msg(message_id=message_is_asking_data['message_id'])
 
     # 检查后保存响应值
-    try:
-        if plugin_config.bingchat_log:
-            create_log(json.dumps(response))
-        current_user_data.history.append(
-            Conversation(ask=user_input_text, response=BingChatResponse(raw=response))
-        )
-    except BingChatAccountReachLimitException as exc:
-        if plugin_config.bingchat_auto_switch_cookies:
-            await matcher.send(reply_out(event, '检测到达到账户上限，将自动刷新账户，所有对话将被清空'))
-            if not await switch_to_usable_cookies():
-                await matcher.finish('无可用cookies')
-            for user_data in plugin_data.user_data_dict.values():
-                await user_data.clear(
-                    sender=Sender(
-                        user_id=event.user_id,
-                        user_name=(event.sender.nickname or '<未知的的用户名>'),
-                    )
-                )
-            await matcher.finish('已切换cookies')
-        await matcher.finish(reply_out(event, f'<请尝联系管理员>\n{exc}'))
-    except (
-        BingChatConversationReachLimitException,
-        BingChatInvalidSessionException,
-    ) as exc:
-        if plugin_config.bingchat_auto_refresh_conversation:
-            if isinstance(exc, BingChatConversationReachLimitException):
-                await matcher.send(reply_out(event, '检测到达到对话上限，将自动刷新对话'))
-            if isinstance(exc, BingChatConversationReachLimitException):
-                await matcher.send(reply_out(event, '检测到达到对话过期，将自动刷新对话'))
-            await bingchat_command_new_chat(
-                bot=bot, event=event, matcher=matcher, arg=arg, depth=depth
-            )
-            await matcher.finish()
-        await matcher.finish(reply_out(event, f'<请尝试刷新>\n{exc}'))
-    except BaseBingChatException as exc:
-        await matcher.finish(reply_out(event, f'<处理响应值值时出错>\n{exc}'))
+    await store_response(
+        event=event,
+        matcher=matcher,
+        user_data=current_user_data,
+        reply_out=reply_out,  # type: ignore
+        new_chat_handler=(
+            bingchat_command_chat,
+            {
+                'bot': bot,
+                'event': event,
+                'matcher': matcher,
+                'arg': arg,
+                'user_data': current_user_data,
+                'depth': depth,
+            },
+        ),
+        response=response,
+        user_question=user_input_text,
+    )
 
     # 发送响应值
     try:

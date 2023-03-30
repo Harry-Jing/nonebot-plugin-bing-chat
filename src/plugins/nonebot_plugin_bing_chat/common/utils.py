@@ -3,7 +3,7 @@ import re
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Awaitable
+from typing import Callable, Awaitable, ParamSpec
 
 from EdgeGPT import Chatbot
 from nonebot.adapters import Bot, Event, Message, MessageSegment
@@ -138,12 +138,14 @@ async def get_display_data(
             return await md_to_pic('\n\n---\n\n'.join(plain_text_list))
 
 
-async def update_chatbot(
+# 下面是主要逻辑的函数
+
+async def get_chatbot(
     event: Event,
     matcher: Matcher,
     user_data: UserData,
     reply_out: Callable[[Event, str | Message | MessageSegment], Message],
-) -> None:
+) -> Chatbot:
     try:
         if not user_data.chatbot:
             user_data.chatbot = Chatbot(
@@ -153,20 +155,22 @@ async def update_chatbot(
     except Exception as exc:
         await matcher.send(reply_out(event, f'<无法创建Chatbot>\n{exc}'))
         raise exc
-
+    else:
+        return user_data.chatbot
 
 async def get_bing_response(
     event: Event,
     matcher: Matcher,
     user_data: UserData,
     reply_out: Callable[[Event, str | Message | MessageSegment], Message],
+    chatbot: Chatbot,
     user_question: str,
-):
+) -> dict:
     message_is_asking_data = None
     # 向Bing发送请求, 并获取响应值
     try:
         user_data.is_waiting = True
-        response = await user_data.chatbot.ask(  # type: ignore chatbot不为None
+        response = await chatbot.ask(  
             prompt=user_question,
             conversation_style=plugin_config.bingchat_conversation_style,
         )
@@ -176,6 +180,8 @@ async def get_bing_response(
     except Exception as exc:
         await matcher.send(reply_out(event, f'<无法询问，如果出现多次请试刷新>\n{exc}'))
         raise exc
+    else:
+        return response
     finally:
         user_data.is_waiting = False
 
@@ -185,7 +191,7 @@ async def store_response(
     matcher: Matcher,
     user_data: UserData,
     reply_out: Callable[[Event, str | Message | MessageSegment], Message],
-    new_chat_handler: tuple[Callable[..., Awaitable[None]], dict],
+    new_chat_handler: tuple[Callable[..., Awaitable], dict],
     response: dict,
     user_question: str,
 ) -> None:
@@ -219,6 +225,7 @@ async def store_response(
                 await matcher.send(reply_out(event, '检测到达到对话上限，将自动刷新对话'))
             if isinstance(exc, BingChatConversationReachLimitException):
                 await matcher.send(reply_out(event, '检测到达到对话过期，将自动刷新对话'))
+            logger.debug(f'{new_chat_handler=}')
             await new_chat_handler[0](**new_chat_handler[1])
             await matcher.finish()
         await matcher.finish(reply_out(event, f'<请尝试刷新>\n{exc}'))
