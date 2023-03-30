@@ -1,0 +1,1 @@
+start powershell -NoExit -Command ".venv\Scripts\activate"
