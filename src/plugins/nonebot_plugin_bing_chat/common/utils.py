@@ -140,6 +140,7 @@ async def get_display_data(
 
 # 下面是主要逻辑的函数
 
+
 async def get_chatbot(
     event: Event,
     matcher: Matcher,
@@ -158,6 +159,7 @@ async def get_chatbot(
     else:
         return user_data.chatbot
 
+
 async def get_bing_response(
     event: Event,
     matcher: Matcher,
@@ -170,7 +172,7 @@ async def get_bing_response(
     # 向Bing发送请求, 并获取响应值
     try:
         user_data.is_waiting = True
-        response = await chatbot.ask(  
+        response = await chatbot.ask(
             prompt=user_question,
             conversation_style=plugin_config.bingchat_conversation_style,
         )

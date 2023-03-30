@@ -100,7 +100,7 @@ async def bingchat_command_chat(
         event=event,
         matcher=matcher,
         user_data=current_user_data,
-        reply_out=reply_out, # type: ignore
+        reply_out=reply_out,  # type: ignore
     )
 
     message_is_asking_data = None
