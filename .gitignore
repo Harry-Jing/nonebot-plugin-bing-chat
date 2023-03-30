@@ -102,7 +102,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -128,5 +127,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# include venv
-!.venv310/*
+# NoneBot
+/data/

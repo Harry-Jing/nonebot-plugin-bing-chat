@@ -1,13 +1,19 @@
-[tool.poetry]
+[project]
 name = "nonebot-plugin-bing-chat"
 version = "0.7.5"
 description = "基于nonebot2的bing-chat软件"
-license = "GPL-3.0-only"
-authors = ["Harry <harry0259@163.com>"]
-maintainers = ["Harry <harry0259@163.com>"]
+authors = [{ name = "Harry", email = "Harry0259@163.com" }]
 readme = "README.md"
-repository = "https://github.com/Harry-Jing/nonebot-plugin-bing-chat"
-keywords = ["nonebot", "bot", "qq", "bing", "chatbot", "gpt"]
+license = { text = "GPL-3" }
+requires-python = ">=3.10"
+dependencies = [
+  "nonebot2>=2.0.0rc3",
+  "nonebot-adapter-onebot>=2.2.2",
+  "nonebot-plugin-apscheduler>=0.2.0",
+  "nonebot-plugin-guild-patch>=0.2.3",
+  "EdgeGPT>=0.1.10.1",
+  "pydantic>=1.10.6",
+]
 classifiers = [
   "Framework :: Pydantic",
   "Topic :: Communications",
@@ -19,24 +25,29 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Natural Language :: Chinese (Simplified)",
 ]
-packages = [{ include = "nonebot_plugin_bing_chat" }]
-include = ["nonebot_plugin_bing_chat/py.typed"]
 
 
-[tool.poetry.dependencies]
-python = "^3.10"
-EdgeGPT = "^0.1.10.1"
-nonebot-adapter-onebot = "^2.2.2"
-nonebot-plugin-apscheduler = "^0.2.0"
-nonebot-plugin-guild-patch = "^0.2.3"
-nonebot-plugin-htmlrender = { version = "^0.2.0.3", optional = true }
-nonebot2 = "^2.0.0rc3"
-pydantic = "^1.10.6"
+[project.optional-dependencies]
+image = ["nonebot-plugin-htmlrender>=0.2.0.3"]
+all = ["ReportLab>=1.2", "RXP"]
 
 
-[tool.poetry.extras]
-image = ["nonebot-plugin-htmlrender"]
-all = ["nonebot-plugin-htmlrender"]
+[project.urls]
+Homepage = "https://github.com/Harry-Jing/nonebot-plugin-bing-chat"
+
+
+[tool.nonebot]
+adapters = [
+  { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" },
+  # { name = "Telegram", module_name = "nonebot.adapters.telegram" },
+  # { name = "QQ 频道", module_name = "nonebot.adapters.qqguild" },
+  # { name = "开黑啦", module_name = "nonebot.adapters.kaiheila" },
+  # { name = "OneBot V12", module_name = "nonebot.adapters.onebot.v12" },
+  # { name = "Console", module_name = "nonebot.adapters.console" },
+]
+plugins = []
+plugin_dirs = ["src/plugins"]
+builtin_plugins = []
 
 
 [tool.pyright]
@@ -50,6 +61,11 @@ target-version = ["py310"]
 skip-string-normalization = true
 
 
+[tool.setuptools.packages.find]
+where = ["src/plugins"]
+include = ["nonebot_plugin_bing_chat*"]
+
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools >= 67.5.0"]
+build-backend = "setuptools.build_meta"
