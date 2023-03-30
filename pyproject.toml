@@ -28,7 +28,7 @@ classifiers = [
 
 
 [project.optional-dependencies]
-image = ["nonebot-plugin-htmlrender^0.2.0.3"]
+image = ["nonebot-plugin-htmlrender>=0.2.0.3"]
 all = ["ReportLab>=1.2", "RXP"]
 
 
@@ -61,6 +61,11 @@ target-version = ["py310"]
 skip-string-normalization = true
 
 
+[tool.setuptools.packages.find]
+where = ["src/plugins"]
+include = ["nonebot_plugin_bing_chat*"]
+
+
 [build-system]
-requires = ["setuptools >= 67.4.0"]
+requires = ["setuptools >= 67.5.0"]
 build-backend = "setuptools.build_meta"
