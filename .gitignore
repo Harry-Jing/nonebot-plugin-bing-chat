@@ -129,3 +129,5 @@ dmypy.json
 
 # NoneBot
 /data/
+/src/test*
+/src/plugins/test*
