@@ -7,11 +7,11 @@ readme = "README.md"
 license = { text = "GPL-3" }
 requires-python = ">=3.10"
 dependencies = [
+  "EdgeGPT>=0.1.12.1",
   "nonebot2>=2.0.0rc3",
   "nonebot-adapter-onebot>=2.2.2",
   "nonebot-plugin-apscheduler>=0.2.0",
   "nonebot-plugin-guild-patch>=0.2.3",
-  "EdgeGPT>=0.1.12.1",
   "pydantic>=1.10.7",
 ]
 classifiers = [
@@ -29,7 +29,7 @@ classifiers = [
 
 [project.optional-dependencies]
 image = ["nonebot-plugin-htmlrender>=0.2.0.3"]
-all = ["ReportLab>=1.2", "RXP"]
+all = ["nonebot-plugin-htmlrender>=0.2.0.3"]
 
 
 [project.urls]
