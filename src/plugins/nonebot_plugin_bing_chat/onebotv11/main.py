@@ -80,12 +80,10 @@ async def bingchat_command_chat(
     if plugin_data.is_switching_cookies:
         await matcher.finish(reply_out(event, '正在切换cookies，请稍后再试'))
 
+    # 获取当前用户数据
     current_user_data = user_data or default_get_user_data(
         event=event, user_data_dict=plugin_data.user_data_dict
     )
-
-    if not current_user_data.first_ask_message_id:
-        current_user_data.first_ask_message_id = event.message_id
 
     # 检查用户是否有对话在进行中，如果有则终止
     try:
@@ -93,37 +91,39 @@ async def bingchat_command_chat(
     except BaseBingChatException as exc:
         await matcher.finish(reply_out(event, str(exc)))
 
+    # 创建一些常用变量
     user_input_text = arg.extract_plain_text()
+    base_data = {
+        'event': event,
+        'matcher': matcher,
+        'user_data': current_user_data,
+        'reply_out': reply_out,
+    }
 
     # 获取Chatbot，如果没有则创建一个
     chatbot = await get_chatbot(
-        event=event,
-        matcher=matcher,
-        user_data=current_user_data,
-        reply_out=reply_out,  # type: ignore
+        **base_data,
     )
 
+    # 发送“正在请求的消息”，并存储message_id
     message_is_asking_data = None
     if plugin_config.bingchat_display_is_waiting:
         message_is_asking_data = await matcher.send(reply_out(event, '正在请求'))
+
     # 向Bing发送请求, 并获取响应值
     response = await get_bing_response(
-        event=event,
-        matcher=matcher,
-        user_data=current_user_data,
-        reply_out=reply_out,  # type: ignore
+        **base_data,
         chatbot=chatbot,
         user_question=user_input_text,
     )
+
+    # 撤回“正在请求的消息”
     if message_is_asking_data and not isinstance(event, GuildMessageEvent):
         await bot.delete_msg(message_id=message_is_asking_data['message_id'])
 
     # 检查后保存响应值
     await store_response(
-        event=event,
-        matcher=matcher,
-        user_data=current_user_data,
-        reply_out=reply_out,  # type: ignore
+        **base_data,
         new_chat_handler=(
             bingchat_command_chat,
             {
@@ -139,7 +139,7 @@ async def bingchat_command_chat(
         user_question=user_input_text,
     )
 
-    # 发送响应值
+    # 发送Bing的回答
     try:
         # 合并转发
         if plugin_config.bingchat_display_in_forward:
