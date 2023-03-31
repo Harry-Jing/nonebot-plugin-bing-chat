@@ -30,17 +30,17 @@ def check_if_in_list(event: MessageEvent) -> str:
         match plugin_config.bingchat_group_filter_mode:
             case 'blacklist':
                 if {
-                    "guild_id": str(event.guild_id),
-                    "group_id": str(event.channel_id),
+                    'guild_id': str(event.guild_id),
+                    'group_id': str(event.channel_id),
                 } in plugin_config.bingchat_guild_filter_blacklist:
-                    raise BingChatPermissionDeniedException('您没有权限，此群组在黑名单')
+                    raise BingChatPermissionDeniedException('您没有权限，此频道在黑名单')
 
             case 'whitelist':
                 if {
-                    "guild_id": str(event.guild_id),
-                    "group_id": str(event.channel_id),
+                    'guild_id': str(event.guild_id),
+                    'group_id': str(event.channel_id),
                 } not in plugin_config.bingchat_guild_filter_whitelist:
-                    raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单')
+                    raise BingChatPermissionDeniedException('您没有权限，此频道不在白名单')
     return '在名单中'
 
 

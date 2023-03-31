@@ -8,7 +8,7 @@ from datetime import datetime
 from EdgeGPT import Chatbot
 from nonebot.log import logger
 from nonebot.matcher import Matcher
-from nonebot.adapters import Bot, Event, Message, MessageSegment
+from nonebot.adapters import Event, Message, MessageSegment
 from nonebot.adapters.onebot.v11 import MessageEvent as OB11MessageEvent
 
 from . import plugin_data, plugin_config
@@ -102,34 +102,23 @@ async def get_display_data(
     for content_type in content_type_list:
         if not (content := user_data.latest_response.get_content(content_type)):
             continue
-        match display_type:
-            case 'text':
-                match content_type:
-                    case 'reference':
-                        new_content = '参考链接：\n'
-                    case 'suggested-question':
-                        new_content = '猜你想问：\n'
-                    case 'num-max-conversation':
-                        new_content = '回复数：'
-                    case _:
-                        new_content = ''
+        match content_type:
+            case 'reference':
+                new_content = '参考链接：\n'
+            case 'suggested-question':
+                new_content = '猜你想问：\n'
+            case 'num-max-conversation':
+                new_content = '回复数：'
+            case _:
+                new_content = ''
 
-            case 'image':
-                match content_type:
-                    case 'reference':
-                        new_content = '参考链接：\n\n'
-                    case 'suggested-question':
-                        new_content = '猜你想问：\n\n'
-                    case 'num-max-conversation':
-                        new_content = '回复数：'
-                    case _:
-                        new_content = ''
         plain_text_list.append(f'{new_content}{content}')
 
     match display_type:
         case 'text':
             return '\n\n'.join(plain_text_list)
         case 'image':
+            plain_text_list = [i.replace('\n', '\n\n') for i in plain_text_list]
             return await md_to_pic('\n\n---\n\n'.join(plain_text_list))
 
 
@@ -218,9 +207,9 @@ async def store_response(
     ) as exc:
         if plugin_config.bingchat_auto_refresh_conversation:
             if isinstance(exc, BingChatConversationReachLimitException):
-                await matcher.send(reply_out(event, '检测到达到对话上限，将自动刷新对话'))
-            if isinstance(exc, BingChatInvalidSessionException):
-                await matcher.send(reply_out(event, '检测到达到对话过期，将自动刷新对话'))
+                await matcher.send(reply_out(event, '检测到对话已达上限，将自动刷新对话'))
+            else:
+                await matcher.send(reply_out(event, '检测到对话已过期，将自动刷新对话'))
             logger.debug(f'{new_chat_handler=}')
             await new_chat_handler[0](**new_chat_handler[1])
             await matcher.finish()
