@@ -286,9 +286,6 @@ class Conversation(BaseModel):
 class UserData(BaseModel, arbitrary_types_allowed=True):
     sender: Sender
 
-    first_ask_message_id: Optional[int] = None
-    last_reply_message_id: int = 0
-
     chatbot: Optional[Chatbot] = None
     last_time: float = time.time()
     is_waiting: bool = False
