@@ -168,7 +168,6 @@ async def get_bing_response(
     chatbot: Chatbot,
     user_question: str,
 ) -> dict:
-    message_is_asking_data = None
     # 向Bing发送请求, 并获取响应值
     try:
         user_data.is_waiting = True
