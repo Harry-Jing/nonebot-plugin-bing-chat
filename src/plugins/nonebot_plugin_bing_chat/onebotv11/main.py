@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 from EdgeGPT import Chatbot
 from nonebot.adapters import Bot
@@ -57,7 +56,7 @@ async def bingchat_command_chat(
     event: MessageEvent,
     matcher: Matcher,
     arg: Message = CommandArg(),
-    user_data: Optional[UserData] = None,
+    user_data: UserData | None = None,
     depth: int = 1,
 ) -> None:
     # 防止无线递归
@@ -88,7 +87,7 @@ async def bingchat_command_chat(
 
     # 检查用户是否有对话在进行中，如果有则终止
     try:
-        check_if_user_is_waiting_for_response(event=event, user_data=current_user_data)
+        check_if_user_is_waiting_for_response(user_data=current_user_data)
     except BaseBingChatException as exc:
         await matcher.finish(reply_out(event, str(exc)))
 
@@ -155,15 +154,15 @@ async def bingchat_command_chat(
         if plugin_config.bingchat_auto_refresh_conversation:
             if isinstance(exc, BingChatConversationReachLimitException):
                 await matcher.send(reply_out(event, '检测到达到对话上限，将自动刷新对话'))
-            if isinstance(exc, BingChatConversationReachLimitException):
-                await matcher.send(reply_out(event, '检测到达到对话过期，将自动刷新对话'))
+            else:
+                await matcher.send(reply_out(event, '检测到对话过期，将自动刷新对话'))
             await bingchat_command_new_chat(
                 bot=bot, event=event, matcher=matcher, arg=arg, depth=depth
             )
             await matcher.finish()
         await matcher.finish(reply_out(event, f'<请尝试刷新>\n{exc}'))
     except BaseBingChatException as exc:
-        await matcher.finish(reply_out(event, f'<处理响应值值时出错>\n{exc}'))
+        await matcher.finish(reply_out(event, f'<处理响应值时出错>\n{exc}'))
 
     # 发送响应值
     try:

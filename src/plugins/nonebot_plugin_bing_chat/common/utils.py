@@ -7,7 +7,7 @@ from EdgeGPT import Chatbot
 from nonebot.log import logger
 
 from . import plugin_config, plugin_data
-from .data_model import DisplayContentType, BingChatResponse, UserData
+from .data_model import BingChatResponse, DisplayContentType, UserData
 from .exceptions import BingChatAccountReachLimitException
 
 if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
@@ -86,32 +86,21 @@ async def get_display_data(
     for content_type in content_type_list:
         if not (content := user_data.latest_response.get_content(content_type)):
             continue
-        match display_type:
-            case 'text':
-                match content_type:
-                    case 'reference':
-                        new_content = '参考链接：\n'
-                    case 'suggested-question':
-                        new_content = '猜你想问：\n'
-                    case 'num-max-conversation':
-                        new_content = '回复数：'
-                    case _:
-                        new_content = ''
+        match content_type:
+            case 'reference':
+                new_content = '参考链接：\n'
+            case 'suggested-question':
+                new_content = '猜你想问：\n'
+            case 'num-max-conversation':
+                new_content = '回复数：'
+            case _:
+                new_content = ''
 
-            case 'image':
-                match content_type:
-                    case 'reference':
-                        new_content = '参考链接：\n\n'
-                    case 'suggested-question':
-                        new_content = '猜你想问：\n\n'
-                    case 'num-max-conversation':
-                        new_content = '回复数：'
-                    case _:
-                        new_content = ''
         plain_text_list.append(f'{new_content}{content}')
 
     match display_type:
         case 'text':
             return '\n\n'.join(plain_text_list)
         case 'image':
+            plain_text_list = [i.replace('\n', '\n\n') for i in plain_text_list]
             return await md_to_pic('\n\n---\n\n'.join(plain_text_list))
