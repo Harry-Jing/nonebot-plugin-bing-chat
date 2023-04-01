@@ -17,7 +17,7 @@ from .data_model import (
     UserData,
     Conversation,
     BingChatResponse,
-    DisplayContentType,
+    T_DisplayContentType,
 )
 from .exceptions import (
     BaseBingChatException,
@@ -95,7 +95,7 @@ async def switch_to_usable_cookies() -> bool:
 
 
 async def get_display_data(
-    user_data: UserData, display_content_type: DisplayContentType
+    user_data: UserData, display_content_type: T_DisplayContentType
 ) -> str | bytes:
     plain_text_list = []
     display_type, content_type_list = display_content_type

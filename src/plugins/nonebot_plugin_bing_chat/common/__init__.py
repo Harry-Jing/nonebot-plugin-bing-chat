@@ -3,6 +3,7 @@ import shutil
 from datetime import datetime, timedelta
 
 from nonebot import require, get_driver
+from nonebot.log import logger
 from nonebot.rule import Rule, to_me, command
 from nonebot.plugin.on import on_message
 

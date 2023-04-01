@@ -7,7 +7,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 
 from ..common import plugin_data, plugin_config
 from ..common.utils import get_display_data, is_conflict_with_other_matcher
-from ..common.data_model import Sender, UserData, UserInfo, DisplayContentType
+from ..common.data_model import Sender, UserData, UserInfo, T_DisplayContentType
 
 if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
     from nonebot_plugin_htmlrender import md_to_pic
@@ -54,7 +54,7 @@ def history_out(bot: Bot, user_data: UserData) -> Message:
 
 
 async def get_display_message(
-    user_data: UserData, display_content_type: DisplayContentType
+    user_data: UserData, display_content_type: T_DisplayContentType
 ) -> Message:
     """获取应该响应的信息片段"""
     display_type, content_type_list = display_content_type
