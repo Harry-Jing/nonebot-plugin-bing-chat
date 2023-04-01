@@ -1,38 +1,31 @@
 import re
-import asyncio
 import json
-from datetime import datetime
+import asyncio
+from typing import Callable, Awaitable, ParamSpec
 from pathlib import Path
 from datetime import datetime
-from typing import Callable, Awaitable, ParamSpec
 
 from EdgeGPT import Chatbot
-from nonebot.adapters import Bot, Event, Message, MessageSegment
 from nonebot.log import logger
 from nonebot.matcher import Matcher
+from nonebot.adapters import Bot, Event, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import MessageEvent as OB11MessageEvent
+from nonebot.adapters.onebot.v11 import GroupMessageEvent as OB11GroupMessageEvent
+from nonebot.adapters.onebot.v11 import PrivateMessageEvent as OB11PrivateMessageEvent
 
 from . import plugin_data, plugin_config
-from .data_model import UserData, BingChatResponse, DisplayContentType
-from .exceptions import BingChatAccountReachLimitException
-from nonebot.adapters.onebot.v11 import (
-    MessageEvent as OB11MessageEvent,
-    GroupMessageEvent as OB11GroupMessageEvent,
-    PrivateMessageEvent as OB11PrivateMessageEvent,
-)
-
-from . import plugin_config, plugin_data
 from .data_model import (
-    DisplayContentType,
-    BingChatResponse,
+    Sender,
     UserData,
     Conversation,
-    Sender,
+    BingChatResponse,
+    DisplayContentType,
 )
 from .exceptions import (
     BaseBingChatException,
+    BingChatInvalidSessionException,
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
-    BingChatInvalidSessionException,
 )
 
 if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
