@@ -1,7 +1,7 @@
 import re
 import json
 import asyncio
-from typing import Callable, Awaitable, ParamSpec
+from typing import Callable, Awaitable
 from pathlib import Path
 from datetime import datetime
 
@@ -10,8 +10,6 @@ from nonebot.log import logger
 from nonebot.matcher import Matcher
 from nonebot.adapters import Bot, Event, Message, MessageSegment
 from nonebot.adapters.onebot.v11 import MessageEvent as OB11MessageEvent
-from nonebot.adapters.onebot.v11 import GroupMessageEvent as OB11GroupMessageEvent
-from nonebot.adapters.onebot.v11 import PrivateMessageEvent as OB11PrivateMessageEvent
 
 from . import plugin_data, plugin_config
 from .data_model import (
