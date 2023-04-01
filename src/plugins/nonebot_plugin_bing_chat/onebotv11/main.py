@@ -1,5 +1,3 @@
-from typing import Optional
-
 from nonebot.log import logger
 from nonebot.params import CommandArg, EventMessage
 from nonebot.matcher import Matcher
