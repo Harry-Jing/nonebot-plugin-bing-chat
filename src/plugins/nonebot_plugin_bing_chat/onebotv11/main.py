@@ -40,7 +40,7 @@ async def bingchat_command_chat(
     event: MessageEvent,
     matcher: Matcher,
     arg: Message = CommandArg(),
-    user_data: Optional[UserData] = None,
+    user_data: UserData | None = None,
     depth: int = 1,
 ) -> None:
     # 防止无线递归
@@ -69,7 +69,7 @@ async def bingchat_command_chat(
 
     # 检查用户是否有对话在进行中，如果有则终止
     try:
-        check_if_user_is_waiting_for_response(event=event, user_data=current_user_data)
+        check_if_user_is_waiting_for_response(user_data=current_user_data)
     except BaseBingChatException as exc:
         await matcher.finish(reply_out(event, str(exc)))
 

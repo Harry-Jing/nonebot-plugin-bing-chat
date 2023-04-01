@@ -31,8 +31,8 @@ ResponseContentType: TypeAlias = Literal[
 ]
 DisplayContentType: TypeAlias = tuple[DisplayType, list[ResponseContentType]]
 
-TParam = ParamSpec("TParam")
-TReturn = TypeVar("TReturn")
+TParam = ParamSpec('TParam')
+TReturn = TypeVar('TReturn')
 TOriginalFunc = Callable[TParam, TReturn]
 TDecoratedFunc = Callable[Concatenate[TParam], TReturn]
 
@@ -74,18 +74,18 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     ]
 
     bingchat_log: bool = True
-    bingchat_proxy: Optional[str] = None
+    bingchat_proxy: str | None = None
     bingchat_plugin_directory: Path = Path('./data/BingChat')
     bingchat_conversation_style: ConversationStyle = 'balanced'
     bingchat_auto_switch_cookies: bool = False
     bingchat_auto_refresh_conversation: bool = True
 
     bingchat_group_filter_mode: FilterMode = 'blacklist'
-    bingchat_group_filter_whitelist: set[Optional[int]] = set()
-    bingchat_group_filter_blacklist: set[Optional[int]] = set()
+    bingchat_group_filter_whitelist: set[int | None] = set()
+    bingchat_group_filter_blacklist: set[int | None] = set()
 
-    bingchat_guild_filter_whitelist: set[Optional[int]] = set()
-    bingchat_guild_filter_blacklist: set[Optional[dict]] = set()
+    bingchat_guild_filter_whitelist: set[dict[str, str] | None] = set()
+    bingchat_guild_filter_blacklist: set[dict[str, str] | None] = set()
 
     def __init__(self, **data: Any) -> None:
         if 'bingchat_show_detail' in data:
@@ -102,19 +102,19 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     def bingchat_command_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_chat不能为空')
-        return set(v) if not isinstance(v, str) else {v}
+        return {v} if isinstance(v, str) else set(v)
 
     @validator('bingchat_command_new_chat', pre=True)
     def bingchat_command_new_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_new_chat不能为空')
-        return set(v) if not isinstance(v, str) else {v}
+        return {v} if isinstance(v, str) else set(v)
 
     @validator('bingchat_command_history_chat', pre=True)
     def bingchat_command_history_chat_validator(cls, v: Any) -> set[str]:
         if not v:
             raise ValueError('bingchat_command_history_chat不能为空')
-        return set(v) if not isinstance(v, str) else {v}
+        return {v} if isinstance(v, str) else set(v)
 
     @validator('bingchat_display_content_types', pre=True)
     def bingchat_display_content_types_validator(
@@ -286,7 +286,7 @@ class Conversation(BaseModel):
 class UserData(BaseModel, arbitrary_types_allowed=True):
     sender: Sender
 
-    chatbot: Optional[Chatbot] = None
+    chatbot: Chatbot | None = None
     last_time: float = time.time()
     is_waiting: bool = False
     history: list[Conversation] = []
