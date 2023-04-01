@@ -219,11 +219,11 @@ async def store_response(
         if plugin_config.bingchat_auto_refresh_conversation:
             if isinstance(exc, BingChatConversationReachLimitException):
                 await matcher.send(reply_out(event, '检测到达到对话上限，将自动刷新对话'))
-            if isinstance(exc, BingChatConversationReachLimitException):
+            if isinstance(exc, BingChatInvalidSessionException):
                 await matcher.send(reply_out(event, '检测到达到对话过期，将自动刷新对话'))
             logger.debug(f'{new_chat_handler=}')
             await new_chat_handler[0](**new_chat_handler[1])
             await matcher.finish()
         await matcher.finish(reply_out(event, f'<请尝试刷新>\n{exc}'))
     except BaseBingChatException as exc:
-        await matcher.finish(reply_out(event, f'<处理响应值值时出错>\n{exc}'))
+        await matcher.finish(reply_out(event, f'<处理响应值时出错>\n{exc}'))
