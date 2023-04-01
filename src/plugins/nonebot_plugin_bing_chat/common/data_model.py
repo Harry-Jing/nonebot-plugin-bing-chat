@@ -1,26 +1,26 @@
 import re
 import time
-from pathlib import Path
 from typing import (
     Any,
-    Callable,
     Literal,
-    Optional,
-    TypeAlias,
     TypeVar,
+    Callable,
+    Optional,
     ParamSpec,
+    TypeAlias,
     Concatenate,
 )
+from pathlib import Path
 
 from EdgeGPT import Chatbot
+from pydantic import Extra, BaseModel, validator
 from nonebot.log import logger
-from pydantic import BaseModel, Extra, validator
 
 from .exceptions import (
+    BingChatResponseException,
+    BingChatInvalidSessionException,
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
-    BingChatInvalidSessionException,
-    BingChatResponseException,
 )
 
 FilterMode: TypeAlias = Literal['whitelist', 'blacklist']

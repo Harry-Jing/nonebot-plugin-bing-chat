@@ -2,52 +2,49 @@ import json
 from typing import Optional
 
 from EdgeGPT import Chatbot
+from nonebot.log import logger
+from nonebot.params import CommandArg, EventMessage
+from nonebot.matcher import Matcher
 from nonebot.adapters import Bot
+from nonebot_plugin_guild_patch import GuildMessageEvent
 from nonebot.adapters.onebot.v11 import (
-    GroupMessageEvent,
     Message,
     MessageEvent,
+    GroupMessageEvent,
     PrivateMessageEvent,
 )
-from nonebot.log import logger
-from nonebot.matcher import Matcher
-from nonebot.params import CommandArg, EventMessage
-from nonebot_plugin_guild_patch import GuildMessageEvent
 
+from .check import check_if_in_list, check_if_user_is_waiting_for_response
+from .utils import (
+    reply_out,
+    history_out,
+    default_get_user_data,
+    get_display_message_list,
+    get_display_message_forward,
+    matcher_reply_to_continue_chat,
+)
 from ..common import (
     HELP_MESSAGE,
-    command_chat,
-    command_history_chat,
-    command_new_chat,
-    plugin_config,
     plugin_data,
+    command_chat,
+    plugin_config,
+    command_new_chat,
+    command_history_chat,
 )
+from ..common.utils import create_log, switch_to_usable_cookies
 from ..common.data_model import (
-    BingChatResponse,
-    Conversation,
     Sender,
     UserData,
     UserInfo,
+    Conversation,
+    BingChatResponse,
 )
 from ..common.exceptions import (
     BaseBingChatException,
+    BingChatResponseException,
+    BingChatInvalidSessionException,
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
-    BingChatInvalidSessionException,
-    BingChatResponseException,
-)
-from ..common.utils import (
-    create_log,
-    switch_to_usable_cookies,
-)
-from .check import check_if_in_list, check_if_user_is_waiting_for_response
-from .utils import (
-    default_get_user_data,
-    get_display_message_forward,
-    get_display_message_list,
-    history_out,
-    matcher_reply_to_continue_chat,
-    reply_out,
 )
 
 

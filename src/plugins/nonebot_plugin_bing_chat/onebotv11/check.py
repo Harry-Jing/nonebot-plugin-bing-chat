@@ -1,15 +1,12 @@
-from nonebot.adapters.onebot.v11 import (
-    GroupMessageEvent,
-    MessageEvent,
-)
 from nonebot_plugin_guild_patch import GuildMessageEvent
+from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
 
+from .utils import UserData
 from ..common import plugin_config
 from ..common.exceptions import (
-    BingchatIsWaitingForResponseException,
     BingChatPermissionDeniedException,
+    BingchatIsWaitingForResponseException,
 )
-from .utils import UserData
 
 
 def check_if_in_list(event: MessageEvent) -> str:
