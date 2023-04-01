@@ -31,7 +31,7 @@ from ..common import (
     command_new_chat,
     command_history_chat,
 )
-from ..common.utils import create_log, switch_to_usable_cookies
+from ..common.utils import get_chatbot, store_response, get_bing_response
 from ..common.data_model import (
     Sender,
     UserData,
@@ -45,20 +45,6 @@ from ..common.exceptions import (
     BingChatInvalidSessionException,
     BingChatAccountReachLimitException,
     BingChatConversationReachLimitException,
-)
-from ..common.utils import (
-    get_chatbot,
-    get_bing_response,
-    store_response,
-)
-from .check import check_if_in_list, check_if_user_is_waiting_for_response
-from .utils import (
-    default_get_user_data,
-    get_display_message_forward,
-    get_display_message_list,
-    history_out,
-    matcher_reply_to_continue_chat,
-    reply_out,
 )
 
 
