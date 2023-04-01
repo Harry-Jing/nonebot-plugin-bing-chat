@@ -1,7 +1,5 @@
-import json
 from typing import Optional
 
-from EdgeGPT import Chatbot
 from nonebot.log import logger
 from nonebot.params import CommandArg, EventMessage
 from nonebot.matcher import Matcher
@@ -32,20 +30,8 @@ from ..common import (
     command_history_chat,
 )
 from ..common.utils import get_chatbot, store_response, get_bing_response
-from ..common.data_model import (
-    Sender,
-    UserData,
-    UserInfo,
-    Conversation,
-    BingChatResponse,
-)
-from ..common.exceptions import (
-    BaseBingChatException,
-    BingChatResponseException,
-    BingChatInvalidSessionException,
-    BingChatAccountReachLimitException,
-    BingChatConversationReachLimitException,
-)
+from ..common.data_model import Sender, UserData, UserInfo
+from ..common.exceptions import BaseBingChatException, BingChatResponseException
 
 
 @command_chat.handle()
