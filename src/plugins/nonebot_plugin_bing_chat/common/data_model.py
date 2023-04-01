@@ -14,27 +14,35 @@ from .exceptions import (
     BingChatConversationReachLimitException,
 )
 
-FilterMode: TypeAlias = Literal['whitelist', 'blacklist']
-ConversationStyle: TypeAlias = Literal['creative', 'balanced', 'precise']
-DisplayType: TypeAlias = Literal['text', 'image']
-ResponseContentType: TypeAlias = Literal[
+T_FilterMode: TypeAlias = Literal['whitelist', 'blacklist']
+T_ConversationStyle: TypeAlias = Literal['creative', 'balanced', 'precise']
+T_DisplayType: TypeAlias = Literal['text', 'image']
+T_ResponseContentType: TypeAlias = Literal[
     'answer', 'reference', 'suggested-question', 'num-max-conversation'
 ]
-DisplayContentType: TypeAlias = tuple[DisplayType, list[ResponseContentType]]
+T_DisplayContentType: TypeAlias = tuple[T_DisplayType, list[T_ResponseContentType]]
+T_SupportAdapter = Literal[
+    'console',
+    'kaiheila',
+    'onebotv11',
+    'onebotv12',
+    'qqguild',
+    'telegram',
+]
 
-TParam = ParamSpec('TParam')
-TReturn = TypeVar('TReturn')
-TOriginalFunc = Callable[TParam, TReturn]
-TDecoratedFunc = Callable[Concatenate[TParam], TReturn]
+T_Param = ParamSpec('T_Param')
+T_Return = TypeVar('T_Return')
+T_OriginalFunc = Callable[T_Param, T_Return]
+T_DecoratedFunc = Callable[Concatenate[T_Param], T_Return]
 
 
 def remove_quote_str(string: str) -> str:
     return re.sub(r'\[\^\d+?\^]', '', string)
 
 
-def get_response_content_handler() -> TDecoratedFunc:
-    def decorator(func: TOriginalFunc) -> TDecoratedFunc:
-        def wrapper(*args, **kwargs) -> TReturn:  # type: ignore
+def get_response_content_handler() -> T_DecoratedFunc:
+    def decorator(func: T_OriginalFunc) -> T_DecoratedFunc:
+        def wrapper(*args, **kwargs) -> T_Return:  # type: ignore
             try:
                 return func(*args, **kwargs)
             except (IndexError, KeyError) as exc:
@@ -49,6 +57,8 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     superusers: set[int]
     command_start: set[str]
 
+    bingchat_adapters: set[T_SupportAdapter] = {'onebotv11'}
+
     bingchat_block: bool = False
     bingchat_to_me: bool = False
     bingchat_priority: int = 1
@@ -60,18 +70,18 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
 
     bingchat_display_is_waiting: bool = True
     bingchat_display_in_forward: bool = False
-    bingchat_display_content_types: list[DisplayContentType] = [
+    bingchat_display_content_types: list[T_DisplayContentType] = [
         ('text', ['num-max-conversation', 'answer', 'suggested-question'])
     ]
 
     bingchat_log: bool = True
     bingchat_proxy: str | None = None
     bingchat_plugin_directory: Path = Path('./data/BingChat')
-    bingchat_conversation_style: ConversationStyle = 'balanced'
+    bingchat_conversation_style: T_ConversationStyle = 'balanced'
     bingchat_auto_switch_cookies: bool = False
     bingchat_auto_refresh_conversation: bool = True
 
-    bingchat_group_filter_mode: FilterMode = 'blacklist'
+    bingchat_group_filter_mode: T_FilterMode = 'blacklist'
     bingchat_group_filter_whitelist: set[int | None] = set()
     bingchat_group_filter_blacklist: set[int | None] = set()
 
@@ -79,15 +89,22 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     bingchat_guild_filter_blacklist: set[dict[str, str] | None] = set()
 
     def __init__(self, **data: Any) -> None:
-        if 'bingchat_show_detail' in data:
-            logger.error(
-                '<bingchat_show_detail>已经弃用，请使用<bingchat_display_content_types>'
-            )
-        if 'bingchat_show_is_waiting' in data:
-            logger.error(
-                '<bingchat_show_is_waiting>已经弃用，请使用<bingchat_display_is_waiting>'
-            )
         super().__init__(**data)
+
+    @validator('bingchat_adapters', pre=True)
+    def bingchat_adapters_validator(cls, v: Any) -> set[str]:
+        if not v:
+            raise ValueError('bingchat_adapters不能为空')
+        if v == 'all':
+            return {
+                'console',
+                'kaiheila',
+                'onebotv11',
+                'onebotv12',
+                'qqguild',
+                'telegram',
+            }
+        return {v} if isinstance(v, str) else set(v)
 
     @validator('bingchat_command_chat', pre=True)
     def bingchat_command_chat_validator(cls, v: Any) -> set[str]:
@@ -110,7 +127,7 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     @validator('bingchat_display_content_types', pre=True)
     def bingchat_display_content_types_validator(
         cls, v: Any
-    ) -> list[DisplayContentType]:
+    ) -> list[T_DisplayContentType]:
         if not v:
             raise ValueError('bingchat_display_content_types不能为空')
         types = []
@@ -245,7 +262,7 @@ class BingChatResponse(BaseModel):
             i['text'] for i in self.raw['item']['messages'][1]['suggestedResponses']
         ]
 
-    def get_content(self, type: ResponseContentType = 'answer') -> str:
+    def get_content(self, type: T_ResponseContentType = 'answer') -> str:
         match type:
             case 'answer':
                 return self.content_answer
