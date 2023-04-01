@@ -39,11 +39,11 @@ Homepage = "https://github.com/Harry-Jing/nonebot-plugin-bing-chat"
 [tool.nonebot]
 adapters = [
   { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" },
-  # { name = "Telegram", module_name = "nonebot.adapters.telegram" },
-  # { name = "QQ 频道", module_name = "nonebot.adapters.qqguild" },
-  # { name = "开黑啦", module_name = "nonebot.adapters.kaiheila" },
-  # { name = "OneBot V12", module_name = "nonebot.adapters.onebot.v12" },
-  # { name = "Console", module_name = "nonebot.adapters.console" },
+  { name = "Telegram", module_name = "nonebot.adapters.telegram" },
+  { name = "QQ 频道", module_name = "nonebot.adapters.qqguild" },
+  { name = "开黑啦", module_name = "nonebot.adapters.kaiheila" },
+  { name = "OneBot V12", module_name = "nonebot.adapters.onebot.v12" },
+  { name = "Console", module_name = "nonebot.adapters.console" },
 ]
 plugins = []
 plugin_dirs = ["src/plugins"]
@@ -59,6 +59,12 @@ typeCheckingMode = "basic"
 [tool.black]
 target-version = ["py310"]
 skip-string-normalization = true
+
+
+[tool.isort]
+profile = "black"
+py_version = 310
+length_sort = true
 
 
 [tool.setuptools.packages.find]
