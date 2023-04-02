@@ -104,9 +104,9 @@ async def get_display_data(
             continue
         match content_type:
             case 'reference':
-                new_content = '参考链接：\n'
+                new_content = '参考链接：[\n]'
             case 'suggested-question':
-                new_content = '猜你想问：\n'
+                new_content = '猜你想问：[\n]'
             case 'num-max-conversation':
                 new_content = '回复数：'
             case _:
@@ -116,9 +116,10 @@ async def get_display_data(
 
     match display_type:
         case 'text':
+            plain_text_list = [i.replace('[\n]', '\n') for i in plain_text_list]
             return '\n\n'.join(plain_text_list)
         case 'image':
-            plain_text_list = [i.replace('\n', '\n\n') for i in plain_text_list]
+            plain_text_list = [i.replace('[\n]', '\n\n') for i in plain_text_list]
             return await md_to_pic('\n\n---\n\n'.join(plain_text_list))
 
 
@@ -208,7 +209,7 @@ async def store_response(
         if plugin_config.bingchat_auto_refresh_conversation:
             if isinstance(exc, BingChatConversationReachLimitException):
                 await matcher.send(reply_out(event, '检测到对话已达上限，将自动刷新对话'))
-            else:
+            if isinstance(exc, BingChatInvalidSessionException):
                 await matcher.send(reply_out(event, '检测到对话已过期，将自动刷新对话'))
             logger.debug(f'{new_chat_handler=}')
             await new_chat_handler[0](**new_chat_handler[1])
