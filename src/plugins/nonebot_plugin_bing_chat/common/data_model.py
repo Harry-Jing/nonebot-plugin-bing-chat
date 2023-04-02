@@ -239,7 +239,7 @@ class BingChatResponse(BaseModel):
 
     @property
     def content_suggested_question(self) -> str:
-        print(self.suggested_question_list)
+        logger.debug(self.suggested_question_list)
         return '\n'.join(f'- {i}' for i in self.suggested_question_list)
 
     @property
