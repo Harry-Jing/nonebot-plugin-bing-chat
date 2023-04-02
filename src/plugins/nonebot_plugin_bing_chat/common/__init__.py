@@ -3,7 +3,7 @@ import shutil
 import importlib
 from datetime import datetime, timedelta
 
-from nonebot import get_driver
+from nonebot import require, get_driver
 from nonebot.rule import Rule, to_me, command
 from nonebot.plugin.on import on_message
 
@@ -90,6 +90,7 @@ def init() -> None:
 
     # 检查依赖
     if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
+        require('nonebot_plugin_apscheduler')
         try:
             importlib.import_module('nonebot_plugin_htmlrender')
         except Exception as exc:
