@@ -1,6 +1,5 @@
 import json
 import shutil
-import importlib
 from datetime import datetime, timedelta
 
 from nonebot import require, get_driver
@@ -92,7 +91,7 @@ def init() -> None:
     if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
         require('nonebot_plugin_apscheduler')
         try:
-            importlib.import_module('nonebot_plugin_htmlrender')
+            require('nonebot_plugin_htmlrender')
         except Exception as exc:
             raise RuntimeError(
                 '请使用 pip install nonebot-plugin-bing-chat[image] markdown渲染插件'
