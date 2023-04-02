@@ -26,7 +26,7 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 
 ## 📖 介绍
 
-一个可以使用新版Bing进行聊天的插件 (现在又不需要代理了）
+一个可以使用新版Bing进行聊天的插件 (现在又**需要**代理了）
 
 目前支持[go-cqhttp](https://docs.go-cqhttp.org/)与[onebot v11](https://onebot.adapters.nonebot.dev/)适配器和[nonebot-plugin-guild-patch](https://github.com/mnixry/nonebot-plugin-guild-patch)
 
