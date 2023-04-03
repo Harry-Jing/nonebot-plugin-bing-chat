@@ -316,8 +316,6 @@ class UserData(BaseModel, arbitrary_types_allowed=True):
             await self.chatbot.close()
 
         self.sender = sender
-        self.first_ask_message_id = None
-        self.last_reply_message_id = 0
         self.chatbot = None
         self.history = []
 
