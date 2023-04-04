@@ -19,10 +19,14 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 <a href="https://pypi.python.org/pypi/nonebot-plugin-bing-chat">
   <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/nonebot-plugin-bing-chat">
 </a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FHarry-Jing%2Fnonebot-plugin-bing-chat?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FHarry-Jing%2Fnonebot-plugin-bing-chat.svg?type=shield"/></a>
 
 <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="python" />
 
 </div>
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FHarry-Jing%2Fnonebot-plugin-bing-chat.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FHarry-Jing%2Fnonebot-plugin-bing-chat?ref=badge_large)
 
 ## 📖 介绍
 
