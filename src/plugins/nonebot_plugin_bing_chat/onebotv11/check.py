@@ -1,5 +1,5 @@
 from nonebot_plugin_guild_patch import GuildMessageEvent
-from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+from nonebot.adapters.onebot.v11.event import MessageEvent, GroupMessageEvent
 
 from .utils import UserData
 from ..common import plugin_config

@@ -3,7 +3,8 @@ from nonebot.params import EventToMe
 from nonebot.adapters import Bot
 from nonebot.plugin.on import on_message
 from nonebot_plugin_guild_patch import GuildMessageEvent
-from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11.event import MessageEvent
+from nonebot.adapters.onebot.v11.message import Message, MessageSegment
 
 from ..common import plugin_data, plugin_config
 from ..common.utils import get_display_data, is_conflict_with_other_matcher

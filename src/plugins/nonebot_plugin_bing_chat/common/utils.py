@@ -9,7 +9,7 @@ from EdgeGPT import Chatbot
 from nonebot.log import logger
 from nonebot.matcher import Matcher
 from nonebot.adapters import Event, Message, MessageSegment
-from nonebot.adapters.onebot.v11 import MessageEvent as OB11MessageEvent
+from nonebot.adapters.onebot.v11.event import MessageEvent as OB11MessageEvent
 
 from . import plugin_data, plugin_config
 from .data_model import (

@@ -3,12 +3,12 @@ from nonebot.params import CommandArg, EventMessage
 from nonebot.matcher import Matcher
 from nonebot.adapters import Bot
 from nonebot_plugin_guild_patch import GuildMessageEvent
-from nonebot.adapters.onebot.v11 import (
-    Message,
+from nonebot.adapters.onebot.v11.event import (
     MessageEvent,
     GroupMessageEvent,
     PrivateMessageEvent,
 )
+from nonebot.adapters.onebot.v11.message import Message
 
 from .check import check_if_in_list, check_if_user_is_waiting_for_response
 from .utils import (
