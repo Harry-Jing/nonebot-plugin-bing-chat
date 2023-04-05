@@ -1,5 +1,5 @@
 from nonebot_plugin_guild_patch import GuildMessageEvent
-from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+from nonebot.adapters.onebot.v11.event import MessageEvent, GroupMessageEvent
 
 from .utils import UserData
 from ..common import plugin_config
@@ -21,32 +21,30 @@ def check_if_in_list(event: MessageEvent) -> str:
         match plugin_config.bingchat_group_filter_mode:
             case 'blacklist':
                 if event.group_id in plugin_config.bingchat_group_filter_blacklist:
-                    raise BingChatPermissionDeniedException('您没有权限，此群组在黑名单')
+                    raise BingChatPermissionDeniedException('您没有权限，此群组在黑名单内')
 
             case 'whitelist':
                 if event.group_id not in plugin_config.bingchat_group_filter_whitelist:
-                    raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单')
+                    raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单内')
     elif isinstance(event, GuildMessageEvent):
         match plugin_config.bingchat_group_filter_mode:
             case 'blacklist':
                 if {
-                    "guild_id": str(event.guild_id),
-                    "group_id": str(event.channel_id),
+                    'guild_id': str(event.guild_id),
+                    'group_id': str(event.channel_id),
                 } in plugin_config.bingchat_guild_filter_blacklist:
-                    raise BingChatPermissionDeniedException('您没有权限，此群组在黑名单')
+                    raise BingChatPermissionDeniedException('您没有权限，此频道在黑名单内')
 
             case 'whitelist':
                 if {
-                    "guild_id": str(event.guild_id),
-                    "group_id": str(event.channel_id),
+                    'guild_id': str(event.guild_id),
+                    'group_id': str(event.channel_id),
                 } not in plugin_config.bingchat_guild_filter_whitelist:
-                    raise BingChatPermissionDeniedException('您没有权限，此群组不在白名单')
+                    raise BingChatPermissionDeniedException('您没有权限，此频道不在白名单内')
     return '在名单中'
 
 
-def check_if_user_is_waiting_for_response(
-    event: MessageEvent, user_data: UserData
-) -> str:
+def check_if_user_is_waiting_for_response(user_data: UserData) -> str:
     """检查用户是否有对话在进行中，如果有则抛出异常"""
     if user_data.is_waiting:
         raise BingchatIsWaitingForResponseException('您有一个对话正在进行中，请先等待回应')

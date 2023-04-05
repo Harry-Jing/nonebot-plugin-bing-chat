@@ -3,6 +3,7 @@ import shutil
 from datetime import datetime, timedelta
 
 from nonebot import require, get_driver
+from nonebot.log import logger
 from nonebot.rule import Rule, to_me, command
 from nonebot.plugin.on import on_message
 
@@ -73,7 +74,7 @@ def init() -> None:
         if cookies_file_path.stat().st_size == 0:
             raise RuntimeError(f'BingChat插件未配置cookie，请在{cookies_file_path}中填入你的cookie')
         try:
-            with open(cookies_file_path, 'r', encoding='utf-8') as f:
+            with open(cookies_file_path, encoding='utf-8') as f:
                 json.load(f)
         except Exception as exc:
             raise RuntimeError(
