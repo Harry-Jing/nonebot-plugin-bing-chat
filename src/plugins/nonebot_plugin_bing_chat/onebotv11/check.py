@@ -42,11 +42,3 @@ def check_if_in_list(event: MessageEvent) -> str:
                 } not in plugin_config.bingchat_guild_filter_whitelist:
                     raise BingChatPermissionDeniedException('您没有权限，此频道不在白名单内')
     return '在名单中'
-
-
-def check_if_user_is_waiting_for_response(user_data: UserData) -> str:
-    """检查用户是否有对话在进行中，如果有则抛出异常"""
-    if user_data.is_waiting:
-        raise BingchatIsWaitingForResponseException('您有一个对话正在进行中，请先等待回应')
-
-    return '用户没有对话在进行中'

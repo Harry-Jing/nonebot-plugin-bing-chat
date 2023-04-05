@@ -23,6 +23,7 @@ from .exceptions import (
     BaseBingChatException,
     BingChatInvalidSessionException,
     BingChatAccountReachLimitException,
+    BingchatIsWaitingForResponseException,
     BingChatConversationReachLimitException,
 )
 
@@ -70,6 +71,14 @@ async def check_cookies_usable(cookies: Path) -> bool:
         return False
     else:
         return True
+
+
+def check_if_user_is_waiting_for_response(user_data: UserData) -> str:
+    """检查用户是否有对话在进行中，如果有则抛出异常"""
+    if user_data.is_waiting:
+        raise BingchatIsWaitingForResponseException('您有一个对话正在进行中，请先等待回应')
+
+    return '用户没有对话在进行中'
 
 
 async def switch_to_usable_cookies() -> bool:

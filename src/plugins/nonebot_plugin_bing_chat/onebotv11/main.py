@@ -10,7 +10,7 @@ from nonebot.adapters.onebot.v11.event import (
 )
 from nonebot.adapters.onebot.v11.message import Message
 
-from .check import check_if_in_list, check_if_user_is_waiting_for_response
+from .check import check_if_in_list
 from .utils import (
     reply_out,
     history_out,
@@ -27,7 +27,12 @@ from ..common import (
     command_new_chat,
     command_history_chat,
 )
-from ..common.utils import get_chatbot, store_response, get_bing_response
+from ..common.utils import (
+    get_chatbot,
+    store_response,
+    get_bing_response,
+    check_if_user_is_waiting_for_response,
+)
 from ..common.data_model import Sender, UserData, UserInfo
 from ..common.exceptions import BaseBingChatException, BingChatResponseException
 
