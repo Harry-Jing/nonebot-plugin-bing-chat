@@ -88,8 +88,8 @@ def init() -> None:
     plugin_log_directory.mkdir(parents=True, exist_ok=True)
 
     # 检查依赖
+    require('nonebot_plugin_apscheduler')
     if any(i == 'image' for i, _ in plugin_config.bingchat_display_content_types):
-        require('nonebot_plugin_apscheduler')
         try:
             require('nonebot_plugin_htmlrender')
         except Exception as exc:
@@ -100,7 +100,7 @@ def init() -> None:
 
 init()
 
-
+"""
 from nonebot_plugin_apscheduler import scheduler
 
 
@@ -112,3 +112,4 @@ async def _del_log_file() -> None:
     for child_dir in plugin_log_directory.iterdir():
         if current_time - datetime.fromisoformat(child_dir.name) > timedelta(days=7):
             shutil.rmtree(child_dir)
+"""
