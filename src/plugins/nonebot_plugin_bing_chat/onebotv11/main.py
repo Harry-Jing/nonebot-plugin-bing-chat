@@ -93,7 +93,7 @@ async def bingchat_command_chat(
     try:
         if not current_user_data.chatbot:
             current_user_data.chatbot = Chatbot(
-                cookiePath=plugin_data.current_cookies_file_path,  # type ignore 应该支持Path的
+                cookiePath=plugin_data.current_cookies_file_path,  # type: ignore 应该支持Path的
                 proxy=plugin_config.bingchat_proxy,
             )
     except Exception as exc:
