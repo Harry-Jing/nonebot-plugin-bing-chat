@@ -1,6 +1,4 @@
 import json
-import shutil
-from datetime import datetime, timedelta
 
 from nonebot import require, get_driver
 from nonebot.rule import Rule, to_me, command
@@ -11,7 +9,6 @@ from .data_model import PluginData, PluginConfig
 plugin_config = PluginConfig.parse_obj(get_driver().config)
 
 plugin_data = PluginData()
-
 
 command_chat = on_message(
     rule=command(*plugin_config.bingchat_command_chat)

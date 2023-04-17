@@ -81,11 +81,11 @@ class PluginConfig(BaseModel, extra=Extra.ignore):
     bingchat_auto_refresh_conversation: bool = True
 
     bingchat_group_filter_mode: FilterMode = 'blacklist'
-    bingchat_group_filter_whitelist: set[Optional[int]] = set()
-    bingchat_group_filter_blacklist: set[Optional[int]] = set()
+    bingchat_group_filter_whitelist: set[int] = set()
+    bingchat_group_filter_blacklist: set[int] = set()
 
-    bingchat_guild_filter_whitelist: set[Optional[int]] = set()
-    bingchat_guild_filter_blacklist: set[Optional[dict]] = set()
+    bingchat_guild_filter_whitelist: list[dict] = []
+    bingchat_guild_filter_blacklist: list[dict] = []
 
     def __init__(self, **data: Any) -> None:
         if 'bingchat_show_detail' in data:
