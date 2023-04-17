@@ -1,6 +1,4 @@
 import json
-import shutil
-from datetime import datetime, timedelta
 
 from nonebot import require, get_driver
 from nonebot.rule import Rule, to_me, command
@@ -12,22 +10,21 @@ plugin_config = PluginConfig.parse_obj(get_driver().config)
 
 plugin_data = PluginData()
 
-
 command_chat = on_message(
     rule=command(*plugin_config.bingchat_command_chat)
-    & (to_me() if plugin_config.bingchat_to_me else Rule()),
+         & (to_me() if plugin_config.bingchat_to_me else Rule()),
     priority=plugin_config.bingchat_priority,
     block=plugin_config.bingchat_block,
 )
 command_new_chat = on_message(
     rule=command(*plugin_config.bingchat_command_new_chat)
-    & (to_me() if plugin_config.bingchat_to_me else Rule()),
+         & (to_me() if plugin_config.bingchat_to_me else Rule()),
     priority=plugin_config.bingchat_priority,
     block=plugin_config.bingchat_block,
 )
 command_history_chat = on_message(
     rule=command(*plugin_config.bingchat_command_history_chat)
-    & (to_me() if plugin_config.bingchat_to_me else Rule()),
+         & (to_me() if plugin_config.bingchat_to_me else Rule()),
     priority=plugin_config.bingchat_priority,
     block=plugin_config.bingchat_block,
 )
