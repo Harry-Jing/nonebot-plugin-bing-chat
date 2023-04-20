@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-bing-chat"
-version = "0.7.10"
+version = "0.7.11"
 description = "基于nonebot2的bing-chat软件"
 authors = [{ name = "Harry", email = "Harry0259@163.com" }]
 readme = "README.md"
