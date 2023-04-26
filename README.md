@@ -28,13 +28,13 @@ _✨ 一个可以使用新版Bing进行聊天的插件 ✨_
 
 一个可以使用新版Bing进行聊天的插件 (现在又**不需要**代理了）
 
-目前支持[go-cqhttp](https://docs.go-cqhttp.org/)与[onebot v11](https://onebot.adapters.nonebot.dev/)适配器和[nonebot-plugin-guild-patch](https://github.com/mnixry/nonebot-plugin-guild-patch)
+目前支持[onebot v11](https://onebot.adapters.nonebot.dev/)协议加上[go-cqhttp](https://docs.go-cqhttp.org/)的扩展协议与[nonebot-plugin-guild-patch](https://github.com/mnixry/nonebot-plugin-guild-patch)
 
 QQ群：366731501
 
 给个star🌟?
 
-> 5月份有考试，暂时随缘更新
+> 5月份有大考，6月前暂停更新
 >
 > 如果你有更多需求，请发布[issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues/new)让我知道
 
