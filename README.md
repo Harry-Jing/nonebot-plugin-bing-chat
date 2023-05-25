@@ -38,6 +38,8 @@ QQ群：366731501
 >
 > 如果你有更多需求，请发布[issue](https://github.com/Harry-Jing/nonebot-plugin-bing-chat/issues/new)让我知道
 
+替代品：https://github.com/canxin121/Spark-GPT
+
 ## 💿 安装与更新
 
 <details>
